@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Revenue Reports | Admin</title>
+    <style>
+        .report-card {
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .stat-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 15px;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        .stat-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        .revenue-highlight {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+        }
+        .course-item {
+            padding: 15px;
+            border-radius: 10px;
+            background: #f8fafc;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        .course-item:hover {
+            background: #e2e8f0;
+            transform: translateX(5px);
+        }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0"><i class="fas fa-chart-line mr-2"></i>Revenue Reports</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="#">Reports</a></li>
+                        <li class="breadcrumb-item active">Revenue Summary</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Revenue Highlight -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="revenue-highlight h-100">
+                        <div class="row align-items-center">
+                            <div class="col-8">
+                                <p class="mb-1 opacity-75">Total Revenue</p>
+                                <h1 class="mb-0 display-4" th:text="'$' + ${totalRevenue ?: 0}">$0</h1>
+                                <p class="mt-2 mb-0">
+                                    <i class="fas fa-arrow-up mr-1"></i>
+                                    From <span th:text="${totalEnrollments ?: 0}">0</span> enrollments
+                                </p>
+                            </div>
+                            <div class="col-4 text-right">
+                                <i class="fas fa-dollar-sign fa-5x opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row h-100">
+                        <div class="col-6 mb-3">
+                            <div class="card stat-card h-100 mb-0">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <p class="text-muted mb-1">Total Courses</p>
+                                            <h2 class="mb-0" th:text="${totalCourses ?: 0}">0</h2>
+                                        </div>
+                                        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                                            <i class="fas fa-book"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="card stat-card h-100 mb-0">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <p class="text-muted mb-1">Published</p>
+                                            <h2 class="mb-0 text-success" th:text="${publishedCourses ?: 0}">0</h2>
+                                        </div>
+                                        <div class="stat-icon bg-success bg-opacity-10 text-success">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card stat-card h-100 mb-0">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <p class="text-muted mb-1">Enrollments</p>
+                                            <h2 class="mb-0 text-info" th:text="${totalEnrollments ?: 0}">0</h2>
+                                        </div>
+                                        <div class="stat-icon bg-info bg-opacity-10 text-info">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card stat-card h-100 mb-0">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <p class="text-muted mb-1">Avg. Price</p>
+                                            <h2 class="mb-0 text-warning" 
+                                                th:text="'$' + ${publishedCourses > 0 ? (totalRevenue / totalEnrollments) : 0}">$0</h2>
+                                        </div>
+                                        <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                                            <i class="fas fa-tag"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Revenue Chart -->
+                <div class="col-md-8">
+                    <div class="card report-card h-100">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-chart-area mr-2"></i>Revenue Overview
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="revenueChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Courses by Revenue -->
+                <div class="col-md-4">
+                    <div class="card report-card h-100">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-trophy mr-2"></i>Top Courses
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div th:each="course, iterStat : ${courses}" th:if="${iterStat.index < 5}">
+                                <div class="course-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong th:text="${course.course_name}">Course Name</strong>
+                                            <br>
+                                            <small class="text-muted" th:text="${course.instructor}">Instructor</small>
+                                        </div>
+                                        <div class="text-right">
+                                            <strong class="text-success" th:text="'$' + ${course.price}">$0</strong>
+                                            <br>
+                                            <small class="text-muted" th:text="${course.enrollmentCount} + ' enrolled'">0 enrolled</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center text-muted py-4" th:if="${courses == null or courses.isEmpty()}">
+                                <i class="fas fa-chart-bar fa-3x mb-3 d-block opacity-50"></i>
+                                No courses available yet.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Enrollments -->
+            <div class="card report-card mt-4">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-receipt mr-2"></i>Recent Enrollments (Revenue)
+                    </h3>
+                    <div class="card-tools">
+                        <a th:href="@{/admin/payments/transactions}" class="btn btn-sm btn-primary">
+                            View All <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body table-responsive p-0">
+                    <table class="table table-hover" th:if="${recentEnrollments != null and !recentEnrollments.isEmpty()}">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Student</th>
+                                <th>Course</th>
+                                <th>Instructor</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="enrollment : ${recentEnrollments}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img th:src="${enrollment.user?.getPhotosImagePath() ?: '/images/user.jpg'}" 
+                                             class="rounded-circle mr-2" style="width: 35px; height: 35px;">
+                                        <span th:text="${enrollment.user?.username ?: 'Unknown'}">Student</span>
+                                    </div>
+                                </td>
+                                <td th:text="${enrollment.course?.course_name ?: 'N/A'}">Course</td>
+                                <td th:text="${enrollment.course?.instructor ?: 'N/A'}">Instructor</td>
+                                <td>
+                                    <strong class="text-success" th:text="'$' + ${enrollment.course?.price ?: 0}">$0</strong>
+                                </td>
+                                <td th:text="${enrollment.enrollmentDate != null ? #temporals.format(enrollment.enrollmentDate, 'dd MMM yyyy') : 'N/A'}">Date</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="text-center text-muted py-4" th:if="${recentEnrollments == null or recentEnrollments.isEmpty()}">
+                        <i class="fas fa-inbox fa-3x mb-3 d-block opacity-50"></i>
+                        No enrollments yet.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        const totalRevenue = /*[[${totalRevenue ?: 0}]]*/ 0;
+        const totalEnrollments = /*[[${totalEnrollments ?: 0}]]*/ 0;
+
+        // Revenue Overview Chart
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Revenue ($)',
+                    data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, totalRevenue],
+                    fill: true,
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderColor: '#10b981',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    pointBackgroundColor: '#10b981',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</th:block>
+
+</body>
+</html>

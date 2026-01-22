@@ -1,0 +1,834 @@
+<div th:fragment="sidebar" xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <style>
+        /* =========================================
+           SIDEBAR THEME VARIABLES (GLASSMORPHISM)
+           ========================================= */
+        :root {
+            /* --- Light Mode Defaults --- */
+            --sidebar-bg: rgba(255, 255, 255, 0.85);
+            --sidebar-border: 1px solid rgba(255, 255, 255, 0.6);
+            --sidebar-shadow: 5px 0 25px rgba(0, 0, 0, 0.05);
+
+            /* Text Colors */
+            --text-brand: #1e293b;
+            --text-primary: #475569;
+            --text-hover: #0f172a;
+
+            /* Interaction Colors */
+            --item-hover-bg: rgba(0, 0, 0, 0.04);
+
+            /* Logic: Parent vs Child Colors */
+            --parent-open-bg: rgba(0, 0, 0, 0.03);
+            --submenu-bg: rgba(0, 0, 0, 0.02);
+            --child-active-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --active-text: #ffffff;
+            --active-shadow: 0 4px 15px rgba(59, 130, 246, 0.35);
+
+            /* Modal */
+            --modal-bg: #ffffff;
+            --modal-text: #334155;
+            --list-border: rgba(0,0,0,0.1);
+        }
+
+        /* --- Dark Mode Overrides --- */
+        body.dark-mode {
+            --sidebar-bg: rgba(15, 23, 42, 0.85);
+            --sidebar-border: 1px solid rgba(255, 255, 255, 0.05);
+            --sidebar-shadow: 5px 0 25px rgba(0, 0, 0, 0.5);
+
+            --text-brand: #ffffff;
+            --text-primary: #cbd5e1;
+            --text-hover: #ffffff;
+
+            --item-hover-bg: rgba(255, 255, 255, 0.05);
+
+            --parent-open-bg: rgba(255, 255, 255, 0.05);
+            --submenu-bg: rgba(0, 0, 0, 0.2);
+            --child-active-gradient: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+            --active-text: #ffffff;
+            --active-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+
+            --modal-bg: #1e293b;
+            --modal-text: #f8fafc;
+            --list-border: rgba(255,255,255,0.1);
+        }
+
+        /* =========================================
+           MAIN SIDEBAR CONTAINER
+           ========================================= */
+        .main-sidebar {
+            background: var(--sidebar-bg) !important;
+            border-right: var(--sidebar-border);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            box-shadow: var(--sidebar-shadow);
+            transition: background 0.3s ease, border 0.3s ease;
+            z-index: 1040;
+        }
+
+        /* Header & Brand */
+        .brand-link {
+            border-bottom: 1px solid var(--list-border) !important;
+            transition: all 0.3s;
+            padding: 15px !important;
+        }
+
+        .brand-text {
+            color: var(--text-brand) !important;
+            font-weight: 600 !important;
+            font-size: 1.25rem;
+            transition: color 0.3s;
+        }
+
+        .sidebar-banner-logo {
+            width: 100%;
+            height: 45px;
+            object-fit: contain;
+            border-radius: 0;
+            margin: 5px 0;
+        }
+
+        /* =========================================
+           USER PROFILE PANEL
+           ========================================= */
+        .user-panel {
+            border-bottom: 1px solid var(--list-border) !important;
+            margin-top: 10px;
+            padding: 20px 15px !important;
+            transition: all 0.3s;
+        }
+
+        .user-panel:hover {
+            background: var(--item-hover-bg);
+        }
+
+        .user-panel .image img {
+            border: 2px solid #6366f1;
+            width: 45px;
+            height: 45px;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .user-panel:hover .image img {
+            transform: scale(1.05);
+        }
+
+        .user-panel .info {
+            padding-left: 12px;
+        }
+
+        .user-panel .info .user-name {
+            color: var(--text-brand) !important;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .user-panel .info .user-role {
+            background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+
+        /* =========================================
+           NAVIGATION LOGIC
+           ========================================= */
+
+        /* Section Headers */
+        .nav-header {
+            color: var(--text-primary) !important;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            padding: 20px 15px 10px 15px !important;
+            margin-top: 10px;
+            opacity: 0.7;
+        }
+
+        /* Base Link Style */
+        .nav-sidebar .nav-link {
+            color: var(--text-primary) !important;
+            border-radius: 10px;
+            margin: 3px 10px;
+            padding: 12px 15px;
+            transition: all 0.2s ease-in-out;
+            border: 1px solid transparent;
+            font-weight: 500;
+        }
+
+        /* Hover State */
+        .nav-sidebar .nav-link:hover {
+            background-color: var(--item-hover-bg) !important;
+            color: var(--text-hover) !important;
+            transform: translateX(4px);
+            border-left: 3px solid #6366f1;
+        }
+
+        /* Parent OPEN State */
+        .nav-sidebar .nav-item.menu-open > .nav-link {
+            background-color: var(--parent-open-bg) !important;
+            color: var(--text-brand) !important;
+            font-weight: 700;
+        }
+
+        /* Submenu Container */
+        .nav-treeview {
+            background-color: var(--submenu-bg);
+            border-radius: 10px;
+            margin: 5px 10px;
+            padding: 8px 5px;
+        }
+
+        .nav-treeview .nav-link {
+            margin: 2px 5px;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+        }
+
+        /* Active State */
+        .nav-sidebar .nav-link.active {
+            background: var(--child-active-gradient) !important;
+            color: var(--active-text) !important;
+            box-shadow: var(--active-shadow);
+            border: 1px solid rgba(255,255,255,0.1);
+            font-weight: 600;
+            transform: translateX(0);
+        }
+
+        .nav-sidebar .nav-link.active .nav-icon {
+            color: #fff !important;
+        }
+
+        /* Icons */
+        .nav-icon {
+            color: #94a3b8;
+            transition: color 0.2s;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-link:hover .nav-icon {
+            color: #6366f1;
+        }
+
+        .nav-link.active .nav-icon {
+            color: white !important;
+        }
+
+        /* Angle Icon for Dropdowns */
+        .right {
+            transition: transform 0.3s;
+        }
+
+        .menu-open > .nav-link .right {
+            transform: rotate(-90deg);
+        }
+
+        /* Logout Link Special Styling */
+        .nav-link.logout-link {
+            color: #ef4444 !important;
+            margin-top: 10px;
+        }
+
+        .nav-link.logout-link:hover {
+            background: rgba(239, 68, 68, 0.1) !important;
+            border-left-color: #ef4444;
+        }
+
+        /* =========================================
+           SCROLLBAR
+           ========================================= */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(100, 116, 139, 0.3);
+            border-radius: 10px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 116, 139, 0.5);
+        }
+
+        /* =========================================
+           SYSTEM HEALTH MODAL
+           ========================================= */
+        .modal-dark-content {
+            background-color: var(--modal-bg);
+            color: var(--modal-text);
+            border: 1px solid var(--list-border);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+        }
+
+        .modal-dark-content .modal-header {
+            border-bottom: 1px solid var(--list-border);
+        }
+
+        .modal-dark-content .modal-title {
+            font-weight: 700;
+        }
+
+        .list-group-item-dark {
+            background-color: transparent;
+            border-color: var(--list-border);
+            color: var(--modal-text);
+        }
+
+        .close {
+            color: var(--modal-text) !important;
+            text-shadow: none;
+            opacity: 0.7;
+        }
+
+        .close:hover {
+            opacity: 1;
+        }
+
+        /* Remove border radius from logos */
+        .brand img,
+        .brand a,
+        .navbar-brand img {
+            border-radius: 0 !important;
+        }
+
+        /* =========================================
+           RESPONSIVE
+           ========================================= */
+        @media (max-width: 768px) {
+            .sidebar-banner-logo {
+                height: 35px;
+            }
+
+            .user-panel {
+                padding: 15px 10px !important;
+            }
+
+            .nav-sidebar .nav-link {
+                padding: 10px 12px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+
+    <aside class="main-sidebar elevation-4">
+
+        <!-- Brand Logo -->
+        <a th:href="${#authorization.expression('hasRole(''INSTRUCTOR'')')
+            ? '/instructor/dashboard' : (
+              #authorization.expression('hasAnyRole(''ADMIN'', ''SUPER_ADMIN'')')
+              ? '/admin/dashboard' : '/')}"
+           class="brand-link d-flex align-items-center justify-content-center">
+
+            <img th:src="@{/images/logo_banner.jpg}"
+                 alt="LMS Logo"
+                 class="sidebar-banner-logo">
+        </a>
+
+        <div class="sidebar">
+
+            <!-- User Panel (Authenticated) -->
+            <div class="user-panel d-flex" sec:authorize="isAuthenticated()">
+                <a th:href="${#authorization.expression('hasRole(''INSTRUCTOR'')') ? '/instructor/profile' : (#authorization.expression('hasAnyRole(''ADMIN'', ''SUPER_ADMIN'')') ? '/admin/profile' : '/student/profile')}"
+                   class="d-flex w-100 align-items-center" style="text-decoration: none;">
+                    <div class="image">
+                        <img th:src="${#authentication.principal.user.getPhotosImagePath()}"
+                             class="img-circle elevation-2"
+                             alt="User Image"
+                             onerror="this.src='/images/user.jpg'">
+                    </div>
+                    <div class="info">
+                        <div class="user-name" th:text="${#authentication.principal.user.fullName}">User Name</div>
+                        <span class="user-role" th:text="${#authentication.principal.user.role}">ROLE</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Guest User Panel -->
+            <div class="user-panel d-flex" sec:authorize="!isAuthenticated()">
+                <div class="info pl-2">
+                    <a th:href="@{/login}" class="d-block font-weight-bold" style="color: #6366f1;">
+                        <i class="fas fa-user-circle mr-2"></i> Guest User
+                    </a>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="mt-2 pb-4">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                    data-accordion="false" id="sidebar-menu">
+
+                    <!-- ============================================= -->
+                    <!-- ADMIN SECTION -->
+                    <!-- ============================================= -->
+                    <li class="nav-header" sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')">
+                        <i class="fas fa-shield-alt mr-1"></i> ADMIN PANEL
+                    </li>
+
+                    <!-- Dashboard -->
+                    <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')">
+                        <a th:href="@{/admin/dashboard}" class="nav-link">
+                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+
+                    <!-- User Management -->
+                    <li class="nav-item has-treeview" sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-users"></i>
+                            <p>
+                                User Management
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a th:href="@{/admin/users}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>All Users</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a th:href="@{/admin/users/instructors}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Instructors</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a th:href="@{/admin/users/students}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Students</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a th:href="@{/admin/instructors/pending}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Pending Instructors</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Course Management -->
+                    <li class="nav-item has-treeview" sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-book-open"></i>
+                            <p>
+                                Course Management
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a th:href="@{/admin/courses}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>All Courses</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a th:href="@{/admin/courses/pending}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Pending Courses</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a th:href="@{/admin/courses/published}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Published Courses</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a th:href="@{/admin/courses/rejected}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Rejected Courses</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Payments -->
+                    <li class="nav-item has-treeview" sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-credit-card"></i>
+                            <p>
+                                Payments
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a th:href="@{/admin/payments/transactions}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Transactions</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a th:href="@{/admin/payments/verification}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Payment Verification</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Reports -->
+                    <li class="nav-item has-treeview" sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-chart-line"></i>
+                            <p>
+                                Reports
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a th:href="@{/admin/reports/users}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>User Summary</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a th:href="@{/admin/reports/revenue}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Revenue Summary</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- ============================================= -->
+                    <!-- INSTRUCTOR SECTION -->
+                    <!-- ============================================= -->
+                    <li class="nav-header" sec:authorize="hasRole('INSTRUCTOR')">
+                        <i class="fas fa-chalkboard-teacher mr-1"></i> INSTRUCTOR
+                    </li>
+
+                    <!-- Dashboard -->
+                    <li class="nav-item" sec:authorize="hasRole('INSTRUCTOR')">
+                        <a th:href="@{/instructor/dashboard}" class="nav-link">
+                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+
+                    <!-- My Courses -->
+                    <li class="nav-item has-treeview" sec:authorize="hasRole('INSTRUCTOR')">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-book"></i>
+                            <p>
+                                My Courses
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a th:href="@{/instructor/courses}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>All Courses</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a th:href="@{/instructor/courses/draft}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Draft</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a th:href="@{/instructor/courses/pending}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Pending Review</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a th:href="@{/instructor/courses/published}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Published</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a th:href="@{/instructor/courses/rejected}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Rejected</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Create Course -->
+                    <li class="nav-item" sec:authorize="hasRole('INSTRUCTOR')">
+                        <a th:href="@{/instructor/courses/create}" class="nav-link">
+                            <i class="nav-icon fas fa-plus-circle"></i>
+                            <p>Create Course</p>
+                        </a>
+                    </li>
+
+                    <!-- Students -->
+                    <li class="nav-item" sec:authorize="hasRole('INSTRUCTOR')">
+                        <a th:href="@{/instructor/students}" class="nav-link">
+                            <i class="nav-icon fas fa-user-graduate"></i>
+                            <p>Enrolled Students</p>
+                        </a>
+                    </li>
+
+                    <!-- Earnings -->
+                    <li class="nav-item" sec:authorize="hasRole('INSTRUCTOR')">
+                        <a th:href="@{/instructor/earnings}" class="nav-link">
+                            <i class="nav-icon fas fa-money-bill-wave"></i>
+                            <p>Earnings Overview</p>
+                        </a>
+                    </li>
+
+                    <!-- ============================================= -->
+                    <!-- STUDENT SECTION -->
+                    <!-- ============================================= -->
+                    <li class="nav-header" sec:authorize="hasAnyRole('USER', 'STUDENT')">
+                        <i class="fas fa-user-graduate mr-1"></i> STUDENT
+                    </li>
+
+                    <!-- Student Dashboard -->
+                    <li class="nav-item" sec:authorize="hasAnyRole('USER', 'STUDENT')">
+                        <a th:href="@{/dashboard}" class="nav-link">
+                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+
+                    <!-- My Courses -->
+                    <li class="nav-item" sec:authorize="hasAnyRole('USER', 'STUDENT')">
+                        <a th:href="@{/my-courses}" class="nav-link">
+                            <i class="nav-icon fas fa-book-reader"></i>
+                            <p>My Courses</p>
+                        </a>
+                    </li>
+
+                    <!-- Browse Courses -->
+                    <li class="nav-item" sec:authorize="hasAnyRole('USER', 'STUDENT')">
+                        <a th:href="@{/courses}" class="nav-link">
+                            <i class="nav-icon fas fa-search"></i>
+                            <p>Browse Courses</p>
+                        </a>
+                    </li>
+
+                    <!-- ============================================= -->
+                    <!-- COMMON SECTION -->
+                    <!-- ============================================= -->
+                    <li class="nav-header">
+                        <i class="fas fa-cog mr-1"></i> ACCOUNT
+                    </li>
+
+                    <!-- Profile -->
+                    <li class="nav-item has-treeview">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-user-circle"></i>
+                            <p>
+                                Profile
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')">
+                                <a th:href="@{/admin/profile}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>My Profile</p>
+                                </a>
+                            </li>
+                            <li class="nav-item" sec:authorize="hasRole('INSTRUCTOR')">
+                                <a th:href="@{/instructor/profile}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>My Profile</p>
+                                </a>
+                            </li>
+                            <li class="nav-item" sec:authorize="hasAnyRole('USER', 'STUDENT')">
+                                <a th:href="@{/student/profile}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>My Profile</p>
+                                </a>
+                            </li>
+                            <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')">
+                                <a th:href="@{/admin/profile/change-password}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Settings</p>
+                                </a>
+                            </li>
+                            <li class="nav-item" sec:authorize="hasRole('INSTRUCTOR')">
+                                <a th:href="@{/instructor/settings}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Settings</p>
+                                </a>
+                            </li>
+                            <li class="nav-item" sec:authorize="hasAnyRole('USER', 'STUDENT')">
+                                <a th:href="@{/student/settings}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Settings</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Logout -->
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <form th:action="@{/logout}" method="post" id="logoutForm" style="display: none;"></form>
+                        <a href="#" class="nav-link logout-link" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
+                            <i class="nav-icon fas fa-sign-out-alt"></i>
+                            <p>Logout</p>
+                        </a>
+                    </li>
+
+                    <!-- Login (Guest) -->
+                    <li class="nav-item" sec:authorize="!isAuthenticated()">
+                        <a th:href="@{/login}" class="nav-link" style="color: #3b82f6 !important;">
+                            <i class="nav-icon fas fa-sign-in-alt"></i>
+                            <p>Login</p>
+                        </a>
+                    </li>
+
+                </ul>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- System Status Modal -->
+    <div class="modal fade" id="systemStatusModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content modal-dark-content">
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title">
+                        <i class="fas fa-server mr-2 text-primary"></i> System Status Monitor
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group list-group-flush" id="healthDataContent">
+                        <div class="text-center py-4">
+                            <i class="fas fa-circle-notch fa-spin fa-2x text-primary"></i>
+                            <p class="mt-2 text-muted small">Analyzing System Metrics...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var currentUrl = window.location.pathname;
+            var sidebarLinks = document.querySelectorAll('.nav-sidebar .nav-link');
+
+            sidebarLinks.forEach(function (link) {
+                var linkHref = link.getAttribute('href');
+
+                if (linkHref && linkHref !== '#') {
+                    var isActive = false;
+
+                    // Exact Match
+                    if (currentUrl === linkHref) isActive = true;
+
+                    // Partial Match (Excluding root)
+                    else if (currentUrl.startsWith(linkHref) && linkHref !== '/') {
+                        isActive = true;
+                    }
+
+                    if (isActive) {
+                        link.classList.add('active');
+
+                        // Open Parent Treeview
+                        var parentNavTree = link.closest('.nav-treeview');
+                        if (parentNavTree) {
+                            parentNavTree.style.display = 'block';
+                            var parentItem = parentNavTree.closest('.nav-item');
+                            if (parentItem) {
+                                parentItem.classList.add('menu-open');
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Auto-Close Logic for Accordion
+            const parentLinks = document.querySelectorAll('.nav-item.has-treeview > .nav-link');
+            parentLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const parentLi = this.parentElement;
+                    const isOpening = !parentLi.classList.contains('menu-open');
+
+                    if (isOpening) {
+                        document.querySelectorAll('.nav-item.has-treeview.menu-open').forEach(item => {
+                            if (item !== parentLi) {
+                                item.classList.remove('menu-open');
+                                const treeview = item.querySelector('.nav-treeview');
+                                if(treeview) treeview.style.display = 'none';
+                            }
+                        });
+                    }
+                });
+            });
+
+            // System Health Fetcher
+            $('#systemStatusModal').on('show.bs.modal', function () {
+                fetch('/api/system-health')
+                    .then(r => r.json())
+                    .then(data => {
+                        let html = `
+                            <div class="row mb-3 text-center">
+                                <div class="col-6 border-right border-secondary">
+                                    <small class="text-muted text-uppercase font-weight-bold" style="font-size: 10px;">Database</small>
+                                    <div class="font-weight-bold text-${data.dbColor}">
+                                        <i class="fas fa-database mr-1"></i> ${data.dbStatus}
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted text-uppercase font-weight-bold" style="font-size: 10px;">System Uptime</small>
+                                    <div class="font-weight-bold text-info">
+                                        <i class="fas fa-clock mr-1"></i> ${data.uptime}
+                                    </div>
+                                </div>
+                            </div>
+                            <hr style="border-color: rgba(255,255,255,0.1);">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small class="text-white"><i class="fas fa-memory mr-1"></i> RAM Usage</small>
+                                    <small class="text-muted">${data.memoryUsed} / ${data.memoryTotal}</small>
+                                </div>
+                                <div class="progress" style="height: 6px; background: rgba(255,255,255,0.1);">
+                                    <div class="progress-bar bg-warning" style="width: ${data.memoryPercent}%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small class="text-white"><i class="fas fa-hdd mr-1"></i> Disk Storage</small>
+                                    <small class="text-muted">${data.diskUsed} / ${data.diskTotal}</small>
+                                </div>
+                                <div class="progress" style="height: 6px; background: rgba(255,255,255,0.1);">
+                                    <div class="progress-bar bg-success" style="width: ${data.diskPercent}%"></div>
+                                </div>
+                            </div>
+                        `;
+                        document.getElementById('healthDataContent').innerHTML = html;
+                    })
+                    .catch(error => {
+                        document.getElementById('healthDataContent').innerHTML =
+                            '<div class="alert alert-danger">Failed to load system health data</div>';
+                    });
+            });
+        });
+    </script>
+</div>

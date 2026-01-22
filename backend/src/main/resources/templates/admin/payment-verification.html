@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Payment Verification | Admin</title>
+    <style>
+        .verification-card {
+            border: none;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+        .verification-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+        }
+        .status-badge {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .empty-state {
+            padding: 80px 20px;
+            text-align: center;
+        }
+        .empty-state i {
+            font-size: 5rem;
+            color: #10b981;
+            margin-bottom: 25px;
+        }
+        .action-btn {
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0"><i class="fas fa-shield-alt mr-2"></i>Payment Verification</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="#">Payments</a></li>
+                        <li class="breadcrumb-item active">Verification</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Alert Messages -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+                <i class="fas fa-check-circle mr-2"></i><span th:text="${success}"></span>
+                <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+                <i class="fas fa-exclamation-circle mr-2"></i><span th:text="${error}"></span>
+                <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+            </div>
+
+            <!-- Stats -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="stat-box">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h2 class="mb-0">0</h2>
+                                <p class="mb-0 opacity-75">Pending Verifications</p>
+                            </div>
+                            <i class="fas fa-hourglass-half fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-gradient-success text-white" style="border-radius: 15px;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h2 class="mb-0" th:text="${pendingPayments?.size() ?: 0}">0</h2>
+                                    <p class="mb-0">Verified Today</p>
+                                </div>
+                                <i class="fas fa-check-double fa-3x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-gradient-danger text-white" style="border-radius: 15px;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h2 class="mb-0">0</h2>
+                                    <p class="mb-0">Rejected</p>
+                                </div>
+                                <i class="fas fa-times-circle fa-3x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="card verification-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-clipboard-check mr-2"></i>Payment Verification Queue
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Info Alert -->
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <strong>Payment Verification System:</strong> 
+                        This system allows you to manually verify payments for enrollments. 
+                        Currently, all enrollments are automatically verified upon completion.
+                    </div>
+
+                    <!-- Empty State -->
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>All Payments Verified!</h3>
+                        <p class="text-muted mb-4">
+                            There are no pending payments requiring manual verification.<br>
+                            All transactions have been automatically verified.
+                        </p>
+                        <a th:href="@{/admin/payments/transactions}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-receipt mr-2"></i>View All Transactions
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Verifications -->
+            <div class="card verification-card mt-4">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-history mr-2"></i>Recent Enrollments (Auto-Verified)
+                    </h3>
+                </div>
+                <div class="card-body table-responsive">
+                    <table class="table table-hover" th:if="${pendingPayments != null and !pendingPayments.isEmpty()}">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Student</th>
+                                <th>Course</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="enrollment : ${pendingPayments}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img th:src="${enrollment.user?.getPhotosImagePath() ?: '/images/user.jpg'}" 
+                                             class="rounded-circle mr-2" style="width: 35px; height: 35px;">
+                                        <span th:text="${enrollment.user?.username ?: 'Unknown'}">Student</span>
+                                    </div>
+                                </td>
+                                <td th:text="${enrollment.course?.course_name ?: 'N/A'}">Course</td>
+                                <td>
+                                    <strong class="text-success" th:text="'$' + ${enrollment.course?.price ?: 0}">$0</strong>
+                                </td>
+                                <td th:text="${enrollment.enrollmentDate != null ? #temporals.format(enrollment.enrollmentDate, 'dd MMM yyyy') : 'N/A'}">Date</td>
+                                <td>
+                                    <span class="status-badge bg-success text-white">
+                                        <i class="fas fa-check mr-1"></i>Verified
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="text-center text-muted py-4" th:if="${pendingPayments == null or pendingPayments.isEmpty()}">
+                        <i class="fas fa-inbox fa-3x mb-3 d-block opacity-50"></i>
+                        No recent enrollments found.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<th:block layout:fragment="script">
+    <script th:inline="none">
+        // Additional scripts if needed
+    </script>
+</th:block>
+
+</body>
+</html>

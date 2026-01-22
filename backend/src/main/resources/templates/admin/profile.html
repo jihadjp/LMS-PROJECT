@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Admin Profile</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">My Profile</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">Profile</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+
+            <!-- Success/Error Messages -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <i class="fas fa-check-circle mr-2"></i><span th:text="${success}">Success message</span>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <i class="fas fa-exclamation-circle mr-2"></i><span th:text="${error}">Error message</span>
+            </div>
+
+            <div class="row">
+                <!-- Profile Info Card -->
+                <div class="col-md-4">
+                    <div class="card card-primary card-outline">
+                        <div class="card-body box-profile">
+                            <div class="text-center">
+                                <img th:src="@{${user.getPhotosImagePath()}}"
+                                     class="profile-user-img img-fluid img-circle"
+                                     style="width: 150px; height: 150px; object-fit: cover;"
+                                     alt="User profile picture">
+                            </div>
+
+                            <h3 class="profile-username text-center" th:text="${user.username}">Username</h3>
+
+                            <p class="text-muted text-center">
+                                <span class="badge badge-danger" th:text="${user.role}">ADMIN</span>
+                            </p>
+
+                            <ul class="list-group list-group-unbordered mb-3">
+                                <li class="list-group-item">
+                                    <b><i class="fas fa-envelope mr-2"></i>Email</b>
+                                    <a class="float-right" th:text="${user.email}">email@example.com</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <b><i class="fas fa-phone mr-2"></i>Phone</b>
+                                    <a class="float-right" th:text="${user.mobileNumber} ?: 'Not set'">Phone</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <b><i class="fas fa-calendar mr-2"></i>Joined</b>
+                                    <a class="float-right" th:text="${#temporals.format(user.createdAt, 'MMM dd, yyyy')}">Date</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <b><i class="fas fa-circle mr-2"></i>Status</b>
+                                    <span class="float-right">
+                                        <span class="badge"
+                                              th:classappend="${user.isActive} ? 'badge-success' : 'badge-secondary'"
+                                              th:text="${user.isActive} ? 'Active' : 'Inactive'">Active</span>
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Additional Info Card -->
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-info-circle mr-2"></i>Additional Info</h3>
+                        </div>
+                        <div class="card-body">
+                            <strong><i class="fas fa-map-marker-alt mr-2"></i>Location</strong>
+                            <p class="text-muted" th:text="${user.location} ?: 'Not specified'">Location</p>
+                            <hr>
+
+                            <strong><i class="fas fa-briefcase mr-2"></i>Profession</strong>
+                            <p class="text-muted" th:text="${user.profession} ?: 'Not specified'">Profession</p>
+                            <hr>
+
+                            <strong><i class="fab fa-linkedin mr-2"></i>LinkedIn</strong>
+                            <p class="text-muted">
+                                <a th:if="${user.linkedin_url}"
+                                   th:href="${user.linkedin_url}"
+                                   target="_blank">View Profile</a>
+                                <span th:unless="${user.linkedin_url}">Not set</span>
+                            </p>
+                            <hr>
+
+                            <strong><i class="fab fa-github mr-2"></i>GitHub</strong>
+                            <p class="text-muted">
+                                <a th:if="${user.github_url}"
+                                   th:href="${user.github_url}"
+                                   target="_blank">View Profile</a>
+                                <span th:unless="${user.github_url}">Not set</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Profile Form -->
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-edit mr-2"></i>Edit Profile</h3>
+                        </div>
+                        <form th:action="@{/admin/update-profile}" method="post" enctype="multipart/form-data">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Full Name <span class="text-danger">*</span></label>
+                                            <input type="text" name="fullName" class="form-control"
+                                                   th:value="${user.username}" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Email <span class="text-danger">*</span></label>
+                                            <input type="email" name="email" class="form-control"
+                                                   th:value="${user.email}" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Mobile Number</label>
+                                            <input type="text" name="mobileNumber" class="form-control"
+                                                   th:value="${user.mobileNumber}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Date of Birth</label>
+                                            <input type="date" name="dob" class="form-control"
+                                                   th:value="${user.dob}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Gender</label>
+                                            <select name="gender" class="form-control">
+                                                <option value="">Select Gender</option>
+                                                <option value="Male" th:selected="${user.gender == 'Male'}">Male</option>
+                                                <option value="Female" th:selected="${user.gender == 'Female'}">Female</option>
+                                                <option value="Other" th:selected="${user.gender == 'Other'}">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Location</label>
+                                            <input type="text" name="location" class="form-control"
+                                                   th:value="${user.location}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Profession</label>
+                                    <input type="text" name="profession" class="form-control"
+                                           th:value="${user.profession}">
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>LinkedIn URL</label>
+                                            <input type="url" name="linkedin_url" class="form-control"
+                                                   th:value="${user.linkedin_url}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>GitHub URL</label>
+                                            <input type="url" name="github_url" class="form-control"
+                                                   th:value="${user.github_url}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Profile Picture</label>
+                                    <div class="custom-file">
+                                        <input type="file" name="image" class="custom-file-input"
+                                               id="profileImage" accept="image/*">
+                                        <label class="custom-file-label" for="profileImage">Choose file</label>
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        Max size: 2MB. Accepted formats: JPG, JPEG, PNG
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save mr-2"></i>Save Changes
+                                </button>
+                                <a th:href="@{/admin/dashboard}" class="btn btn-secondary">
+                                    <i class="fas fa-times mr-2"></i>Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</div>
+
+<th:block layout:fragment="script">
+    <script>
+        // Display selected file name
+        $('.custom-file-input').on('change', function() {
+            var fileName = $(this).val().split('\\').pop();
+            $(this).siblings('.custom-file-label').addClass('selected').html(fileName);
+        });
+    </script>
+</th:block>
+</body>
+</html>

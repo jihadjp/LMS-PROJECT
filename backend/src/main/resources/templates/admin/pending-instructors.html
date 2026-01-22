@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Pending Instructors | Admin</title>
+    <style>
+        .instructor-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .instructor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .avatar-lg {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #6366f1;
+        }
+        .status-pending {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .empty-state i {
+            font-size: 4rem;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+        }
+        .action-btn {
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0"><i class="fas fa-user-clock mr-2"></i>Pending Instructors</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a th:href="@{/admin/users}">Users</a></li>
+                        <li class="breadcrumb-item active">Pending Instructors</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Alert Messages -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+                <i class="fas fa-check-circle mr-2"></i><span th:text="${success}"></span>
+                <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+                <i class="fas fa-exclamation-circle mr-2"></i><span th:text="${error}"></span>
+                <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+            </div>
+
+            <!-- Stats Card -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-gradient-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h3 class="mb-0" th:text="${totalPending ?: 0}">0</h3>
+                                    <p class="mb-0">Pending Requests</p>
+                                </div>
+                                <i class="fas fa-user-clock fa-3x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Instructors List -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-users mr-2"></i>Instructor Approval Requests
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row" th:if="${pendingInstructors != null and !pendingInstructors.isEmpty()}">
+                        <div class="col-md-6 col-lg-4 mb-4" th:each="instructor : ${pendingInstructors}">
+                            <div class="card instructor-card h-100">
+                                <div class="card-body text-center">
+                                    <img th:src="${instructor.getPhotosImagePath() ?: '/images/user.jpg'}" 
+                                         class="avatar-lg mb-3" alt="Avatar">
+                                    <h5 class="card-title mb-1" th:text="${instructor.username}">Instructor Name</h5>
+                                    <p class="text-muted mb-2" th:text="${instructor.email}">email@example.com</p>
+                                    <span class="status-pending mb-3 d-inline-block">
+                                        <i class="fas fa-clock mr-1"></i>Pending Approval
+                                    </span>
+                                    
+                                    <hr>
+                                    
+                                    <div class="row text-center small">
+                                        <div class="col-6">
+                                            <strong>Joined</strong><br>
+                                            <span th:text="${#temporals.format(instructor.createdAt, 'dd MMM yyyy')}">Date</span>
+                                        </div>
+                                        <div class="col-6">
+                                            <strong>Profession</strong><br>
+                                            <span th:text="${instructor.profession ?: 'N/A'}">N/A</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <div class="d-flex justify-content-between">
+                                        <form th:action="@{/admin/instructors/approve/{id}(id=${instructor.id})}" method="post">
+                                            <button type="submit" class="btn btn-success action-btn">
+                                                <i class="fas fa-check mr-1"></i>Approve
+                                            </button>
+                                        </form>
+                                        <form th:action="@{/admin/instructors/reject/{id}(id=${instructor.id})}" method="post">
+                                            <button type="submit" class="btn btn-danger action-btn"
+                                                    onclick="return confirm('Reject this instructor request?')">
+                                                <i class="fas fa-times mr-1"></i>Reject
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div class="empty-state" th:if="${pendingInstructors == null or pendingInstructors.isEmpty()}">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <h4>All Caught Up!</h4>
+                        <p class="text-muted">There are no pending instructor requests at the moment.</p>
+                        <a th:href="@{/admin/users/instructors}" class="btn btn-primary">
+                            <i class="fas fa-users mr-2"></i>View All Instructors
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<th:block layout:fragment="script">
+    <script th:inline="none">
+        // Additional scripts if needed
+    </script>
+</th:block>
+
+</body>
+</html>

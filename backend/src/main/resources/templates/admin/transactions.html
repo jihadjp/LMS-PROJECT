@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Transactions | Admin</title>
+    <style>
+        .stat-card {
+            border: none;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        .transaction-table {
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .empty-state i {
+            font-size: 4rem;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0"><i class="fas fa-receipt mr-2"></i>Transactions</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="#">Payments</a></li>
+                        <li class="breadcrumb-item active">Transactions</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Stats Row -->
+            <div class="row mb-4">
+                <div class="col-lg-3 col-6">
+                    <div class="card stat-card bg-gradient-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h3 class="mb-0" th:text="${totalTransactions ?: 0}">0</h3>
+                                    <p class="mb-0">Total Transactions</p>
+                                </div>
+                                <div class="stat-icon bg-white bg-opacity-20">
+                                    <i class="fas fa-exchange-alt text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="card stat-card bg-gradient-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h3 class="mb-0" th:text="${totalTransactions ?: 0}">0</h3>
+                                    <p class="mb-0">Completed</p>
+                                </div>
+                                <div class="stat-icon bg-white bg-opacity-20">
+                                    <i class="fas fa-check-circle text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="card stat-card bg-gradient-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h3 class="mb-0">0</h3>
+                                    <p class="mb-0">Pending</p>
+                                </div>
+                                <div class="stat-icon bg-white bg-opacity-20">
+                                    <i class="fas fa-clock text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="card stat-card bg-gradient-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h3 class="mb-0">$0</h3>
+                                    <p class="mb-0">Total Revenue</p>
+                                </div>
+                                <div class="stat-icon bg-white bg-opacity-20">
+                                    <i class="fas fa-dollar-sign text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions Table -->
+            <div class="card transaction-table">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-list mr-2"></i>All Transactions
+                    </h3>
+                    <div class="card-tools">
+                        <div class="input-group input-group-sm" style="width: 250px;">
+                            <input type="text" class="form-control" placeholder="Search transactions...">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body table-responsive p-0">
+                    <table class="table table-hover" th:if="${transactions != null and !transactions.isEmpty()}">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Student</th>
+                                <th>Course</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="enrollment, iterStat : ${transactions}">
+                                <td th:text="${iterStat.index + 1}">1</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img th:src="${enrollment.user?.getPhotosImagePath() ?: '/images/user.jpg'}" 
+                                             class="rounded-circle mr-2" style="width: 35px; height: 35px; object-fit: cover;">
+                                        <div>
+                                            <strong th:text="${enrollment.user?.username ?: 'Unknown'}">Student</strong>
+                                            <br>
+                                            <small class="text-muted" th:text="${enrollment.user?.email}">email</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span th:text="${enrollment.course?.course_name ?: 'N/A'}">Course Name</span>
+                                </td>
+                                <td>
+                                    <strong class="text-success" th:text="'$' + ${enrollment.course?.price ?: 0}">$0</strong>
+                                </td>
+                                <td th:text="${enrollment.enrollmentDate != null ? #temporals.format(enrollment.enrollmentDate, 'dd MMM yyyy HH:mm') : 'N/A'}">
+                                    Date
+                                </td>
+                                <td>
+                                    <span class="status-badge bg-success text-white">
+                                        <i class="fas fa-check mr-1"></i>Completed
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Empty State -->
+                    <div class="empty-state" th:if="${transactions == null or transactions.isEmpty()}">
+                        <i class="fas fa-receipt"></i>
+                        <h4>No Transactions Yet</h4>
+                        <p class="text-muted">Transactions will appear here once students enroll in courses.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<th:block layout:fragment="script">
+    <script th:inline="none">
+        $(document).ready(function() {
+            $('.table').DataTable({
+                "responsive": true,
+                "autoWidth": false,
+                "order": [[ 4, "desc" ]],
+                "pageLength": 25
+            });
+        });
+    </script>
+</th:block>
+
+</body>
+</html>

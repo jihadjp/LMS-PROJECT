@@ -1,0 +1,293 @@
+<div th:fragment="header" xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <style>
+        /* =========================================
+           THEME VARIABLES
+           ========================================= */
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --input-bg: rgba(255, 255, 255, 0.5);
+            --input-border: rgba(0, 0, 0, 0.1);
+            --hover-bg: rgba(0, 0, 0, 0.05);
+            --dropdown-bg: rgba(255, 255, 255, 0.9);
+            --highlight: #3b82f6;
+        }
+
+        body.dark-mode {
+            --glass-bg: rgba(15, 23, 42, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --input-border: rgba(255, 255, 255, 0.1);
+            --hover-bg: rgba(255, 255, 255, 0.1);
+            --dropdown-bg: #1e293b;
+            --highlight: #60a5fa;
+        }
+
+        .glass-effect {
+            background: var(--glass-bg) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border) !important;
+            box-shadow: var(--glass-shadow);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .main-header { border: none; }
+
+        .navbar-nav .nav-link {
+            color: var(--text-muted) !important;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .navbar-nav .nav-link:hover, .navbar-nav .nav-link.active {
+            color: var(--text-main) !important;
+            transform: translateY(-1px);
+        }
+
+        .search-container {
+            width: 250px;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 576px) {
+            .search-container {
+                width: 160px;
+            }
+        }
+
+        .form-control-navbar {
+            background-color: var(--input-bg) !important;
+            border: 1px solid var(--input-border) !important;
+            color: var(--text-main) !important;
+            backdrop-filter: blur(5px);
+        }
+
+        .form-control-navbar::placeholder {
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
+        .form-control-navbar:focus {
+            background-color: var(--hover-bg) !important;
+            border-color: var(--highlight) !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-navbar {
+            background-color: var(--input-bg) !important;
+            border: 1px solid var(--input-border) !important;
+            border-left: none !important;
+            color: var(--text-muted) !important;
+        }
+
+        .btn-navbar:hover {
+            background-color: var(--hover-bg) !important;
+            color: var(--highlight) !important;
+        }
+
+        .dropdown-menu {
+            background-color: var(--dropdown-bg) !important;
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            border-radius: 12px;
+        }
+
+        .dropdown-item {
+            color: var(--text-muted) !important;
+            border-radius: 8px;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--hover-bg) !important;
+            color: var(--text-main) !important;
+            padding-left: 28px;
+        }
+
+        .dropdown-divider {
+            border-color: var(--input-border);
+        }
+
+        .badge-pulse {
+            animation: pulse-animation 2s infinite;
+        }
+
+        @keyframes pulse-animation {
+            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+    </style>
+
+    <nav class="main-header navbar navbar-expand glass-effect">
+
+        <ul class="navbar-nav">
+            <!-- Sidebar Toggle -->
+            <li class="nav-item">
+                <a class="nav-link" data-widget="pushmenu" href="#" role="button">
+                    <i class="fas fa-bars"></i>
+                </a>
+            </li>
+
+            <!-- Home Link -->
+            <li class="nav-item d-none d-sm-inline-block">
+                <a th:href="${#authorization.expression('hasRole(''INSTRUCTOR'')') ? '/instructor/dashboard' :
+                             #authorization.expression('hasAnyRole(''ADMIN'', ''SUPER_ADMIN'')') ? '/admin/dashboard' : '/'}"
+                   class="nav-link">
+                    <i class="fas fa-home mr-1"></i>Home
+                </a>
+            </li>
+        </ul>
+
+        <ul class="navbar-nav ml-auto align-items-center">
+
+            <!-- Theme Toggle -->
+            <li class="nav-item mr-3">
+                <a class="nav-link" href="#" id="headerThemeToggle" role="button" title="Switch Theme">
+                    <i class="fas fa-moon" id="headerThemeIcon"></i>
+                </a>
+            </li>
+
+            <!-- Search Bar (Admin Only) -->
+            <li class="nav-item d-flex mr-3" sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')">
+                <form class="form-inline" th:action="@{/admin/users}" method="get">
+                    <div class="input-group input-group-sm search-container">
+                        <input class="form-control form-control-navbar rounded-left"
+                               type="search" name="keyword" placeholder="Search users..." aria-label="Search">
+                        <div class="input-group-append">
+                            <button class="btn btn-navbar rounded-right" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </li>
+
+            <!-- Notifications (Admin Only) -->
+            <li class="nav-item dropdown mr-2"
+                sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')"
+                th:with="pendingCourses=${pendingCoursesCount ?: 0}">
+
+                <a class="nav-link" data-toggle="dropdown" href="#">
+                    <i class="far fa-bell" style="font-size: 1.2rem;"></i>
+                    <span class="badge badge-warning navbar-badge badge-pulse"
+                          th:if="${pendingCourses > 0}"
+                          th:text="${pendingCourses}">0</span>
+                </a>
+
+                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                    <span class="dropdown-item dropdown-header font-weight-bold">
+                        <span th:text="${pendingCourses}">0</span> Notifications
+                    </span>
+
+                    <div class="dropdown-divider"></div>
+
+                    <a th:if="${pendingCourses > 0}"
+                       th:href="@{/admin/courses/pending}"
+                       class="dropdown-item">
+                        <i class="fas fa-clock mr-2 text-warning"></i>
+                        <span th:text="${pendingCourses}">0</span> Courses Pending Approval
+                        <span class="float-right text-muted text-sm">Review Now</span>
+                    </a>
+
+                    <div th:if="${pendingCourses == 0}"
+                         class="dropdown-item text-center text-muted p-3">
+                        <i class="far fa-check-circle mb-1"></i><br>
+                        <small>No pending notifications</small>
+                    </div>
+
+                    <div class="dropdown-divider"></div>
+                    <a th:href="@{/admin/dashboard}"
+                       class="dropdown-item dropdown-footer text-center">
+                        Go to Dashboard
+                    </a>
+                </div>
+            </li>
+
+            <!-- User Profile Dropdown -->
+            <li class="nav-item dropdown">
+                <a class="nav-link" data-toggle="dropdown" href="#">
+                    <img th:if="${#authentication.principal != null}"
+                         th:src="${#authentication.principal.user.getPhotosImagePath()}"
+                         class="img-circle elevation-1"
+                         style="width: 30px; height: 30px; object-fit: cover;"
+                         alt="User"
+                         onerror="this.src='/images/user.jpg'">
+                    <i th:unless="${#authentication.principal != null}"
+                       class="far fa-user-circle"
+                       style="font-size: 1.4rem;"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <!-- Profile Link -->
+                    <a th:href="${#authorization.expression('hasRole(''INSTRUCTOR'')') ? '/instructor/profile' : '/admin/profile'}"
+                       class="dropdown-item">
+                        <i class="fas fa-user mr-2 text-info"></i> My Profile
+                    </a>
+
+                    <!-- Settings Link -->
+                    <a th:href="${#authorization.expression('hasRole(''INSTRUCTOR'')') ? '/instructor/settings' : '/admin/settings'}"
+                       class="dropdown-item">
+                        <i class="fas fa-cog mr-2 text-secondary"></i> Settings
+                    </a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <!-- Logout -->
+                    <div sec:authorize="isAuthenticated()">
+                        <form th:action="@{/logout}" method="post">
+                            <button type="submit" class="dropdown-item text-danger">
+                                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Login (for guests) -->
+                    <div sec:authorize="!isAuthenticated()">
+                        <a th:href="@{/login}" class="dropdown-item text-primary">
+                            <i class="fas fa-sign-in-alt mr-2"></i> Login
+                        </a>
+                    </div>
+                </div>
+            </li>
+
+        </ul>
+    </nav>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleBtn = document.getElementById('headerThemeToggle');
+            const themeIcon = document.getElementById('headerThemeIcon');
+            const body = document.body;
+            const STORAGE_KEY = 'lms_theme';
+
+            function updateIcon() {
+                if (body.classList.contains('dark-mode')) {
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                } else {
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                }
+            }
+            updateIcon();
+
+            if(toggleBtn){
+                toggleBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    body.classList.toggle('dark-mode');
+                    updateIcon();
+                    localStorage.setItem(STORAGE_KEY, body.classList.contains('dark-mode') ? 'dark' : 'light');
+                });
+            }
+        });
+    </script>
+</div>

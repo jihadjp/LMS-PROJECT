@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Settings</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">Settings</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">Settings</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+
+            <!-- Success/Error Messages -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <i class="fas fa-check-circle mr-2"></i><span th:text="${success}">Success</span>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <i class="fas fa-exclamation-circle mr-2"></i><span th:text="${error}">Error</span>
+            </div>
+
+            <div class="row">
+                <!-- Settings Navigation -->
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Settings Menu</h3>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="nav nav-pills flex-column">
+                                <li class="nav-item active">
+                                    <a href="#account" class="nav-link active" data-toggle="pill">
+                                        <i class="fas fa-user mr-2"></i>Account
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#security" class="nav-link" data-toggle="pill">
+                                        <i class="fas fa-lock mr-2"></i>Security
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#notifications" class="nav-link" data-toggle="pill">
+                                        <i class="fas fa-bell mr-2"></i>Notifications
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#preferences" class="nav-link" data-toggle="pill">
+                                        <i class="fas fa-cog mr-2"></i>Preferences
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Content -->
+                <div class="col-md-9">
+                    <div class="tab-content">
+
+                        <!-- Account Tab -->
+                        <div class="tab-pane fade show active" id="account">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i class="fas fa-user mr-2"></i>Account Information
+                                    </h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle mr-2"></i>
+                                        To update your profile information, please visit the
+                                        <a th:href="@{/instructor/profile}">Profile Page</a>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Account Status</label>
+                                                <p>
+                                                    <span class="badge badge-success">Active</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Role</label>
+                                                <p><span class="badge badge-primary">Instructor</span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <hr>
+
+                                    <h5 class="text-danger">
+                                        <i class="fas fa-exclamation-triangle mr-2"></i>Danger Zone
+                                    </h5>
+                                    <p class="text-muted">
+                                        Account deletion is not available through this interface.
+                                        Please contact support if you need to delete your account.
+                                    </p>
+                                    <button class="btn btn-danger" disabled>
+                                        <i class="fas fa-trash mr-2"></i>Delete Account (Contact Support)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security Tab -->
+                        <div class="tab-pane fade" id="security">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i class="fas fa-lock mr-2"></i>Change Password
+                                    </h3>
+                                </div>
+                                <form th:action="@{/instructor/change-password}" method="post">
+                                    <div class="card-body">
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-shield-alt mr-2"></i>
+                                            For your security, password must be at least 6 characters long.
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Current Password <span class="text-danger">*</span></label>
+                                            <input type="password" name="currentPassword"
+                                                   class="form-control" required
+                                                   placeholder="Enter your current password">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>New Password <span class="text-danger">*</span></label>
+                                            <input type="password" name="newPassword"
+                                                   class="form-control" required
+                                                   id="newPassword"
+                                                   minlength="6"
+                                                   placeholder="Enter new password">
+                                            <small class="form-text text-muted">
+                                                Use a strong password with letters, numbers, and symbols
+                                            </small>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Confirm New Password <span class="text-danger">*</span></label>
+                                            <input type="password" name="confirmPassword"
+                                                   class="form-control" required
+                                                   id="confirmPassword"
+                                                   minlength="6"
+                                                   placeholder="Re-enter new password">
+                                            <small id="passwordError" class="text-danger" style="display: none;">
+                                                Passwords do not match!
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <button type="submit" class="btn btn-primary" id="changePasswordBtn">
+                                            <i class="fas fa-key mr-2"></i>Change Password
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Session Management -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i class="fas fa-desktop mr-2"></i>Active Sessions
+                                    </h3>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted">
+                                        <i class="fas fa-info-circle mr-2"></i>
+                                        Session management features will be available in a future update.
+                                    </p>
+                                    <button class="btn btn-secondary" disabled>
+                                        <i class="fas fa-sign-out-alt mr-2"></i>Sign Out All Devices (Coming Soon)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notifications Tab -->
+                        <div class="tab-pane fade" id="notifications">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i class="fas fa-bell mr-2"></i>Email Notifications
+                                    </h3>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted mb-3">
+                                        <i class="fas fa-info-circle mr-2"></i>
+                                        Choose what email notifications you want to receive
+                                    </p>
+
+                                    <div class="form-group">
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input"
+                                                   id="courseApprovalNotif" checked disabled>
+                                            <label class="custom-control-label" for="courseApprovalNotif">
+                                                <strong>Course Approval Status</strong>
+                                                <br><small class="text-muted">Get notified when your course is approved or rejected</small>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input"
+                                                   id="newEnrollmentNotif" disabled>
+                                            <label class="custom-control-label" for="newEnrollmentNotif">
+                                                <strong>New Student Enrollments</strong>
+                                                <br><small class="text-muted">Be notified when students enroll in your courses (Coming Soon)</small>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input"
+                                                   id="courseReviewNotif" disabled>
+                                            <label class="custom-control-label" for="courseReviewNotif">
+                                                <strong>Course Reviews & Ratings</strong>
+                                                <br><small class="text-muted">Get alerts when students rate your courses (Coming Soon)</small>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input"
+                                                   id="weeklyReportNotif" disabled>
+                                            <label class="custom-control-label" for="weeklyReportNotif">
+                                                <strong>Weekly Performance Report</strong>
+                                                <br><small class="text-muted">Receive weekly summaries of your courses (Coming Soon)</small>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="alert alert-warning mt-3">
+                                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                                        <strong>MVP Notice:</strong> Only critical email notifications (course approval)
+                                        are enabled in this version. More options will be added in future updates.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preferences Tab -->
+                        <div class="tab-pane fade" id="preferences">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i class="fas fa-cog mr-2"></i>Display Preferences
+                                    </h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label>Theme</label>
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input" id="darkModeSwitch">
+                                            <label class="custom-control-label" for="darkModeSwitch">
+                                                <i class="fas fa-moon mr-2"></i>Enable Dark Mode
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <hr>
+
+                                    <div class="form-group">
+                                        <label>Language</label>
+                                        <select class="form-control" disabled>
+                                            <option>English (Default)</option>
+                                            <option>Bengali (Coming Soon)</option>
+                                        </select>
+                                        <small class="form-text text-muted">
+                                            Multi-language support will be available in future updates
+                                        </small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Timezone</label>
+                                        <select class="form-control" disabled>
+                                            <option>UTC +6:00 (Bangladesh Standard Time)</option>
+                                        </select>
+                                    </div>
+
+                                    <hr>
+
+                                    <h5><i class="fas fa-chalkboard mr-2"></i>Teaching Preferences</h5>
+                                    <p class="text-muted">More customization options coming soon</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</div>
+
+<th:block layout:fragment="script">
+    <script>
+        $(document).ready(function() {
+            // Password confirmation validation
+            $('#confirmPassword').on('keyup', function() {
+                const newPassword = $('#newPassword').val();
+                const confirmPassword = $(this).val();
+
+                if (newPassword !== confirmPassword) {
+                    $('#passwordError').show();
+                    $('#changePasswordBtn').prop('disabled', true);
+                } else {
+                    $('#passwordError').hide();
+                    $('#changePasswordBtn').prop('disabled', false);
+                }
+            });
+
+            // Dark mode toggle
+            const darkModeSwitch = $('#darkModeSwitch');
+            if ($('body').hasClass('dark-mode')) {
+                darkModeSwitch.prop('checked', true);
+            }
+
+            darkModeSwitch.on('change', function() {
+                $('body').toggleClass('dark-mode');
+                const isDark = $('body').hasClass('dark-mode');
+                localStorage.setItem('payroll_theme', isDark ? 'dark' : 'light');
+            });
+        });
+    </script>
+</th:block>
+</body>
+</html>

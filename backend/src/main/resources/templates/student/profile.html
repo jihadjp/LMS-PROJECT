@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>My Profile | LMS</title>
+    <style>
+        :root {
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --primary: #4f46e5;
+            --success: #10b981;
+            --radius: 12px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode {
+            --bg-card: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: var(--radius);
+            padding: 30px;
+            color: white;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .profile-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .profile-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .profile-card .card-header {
+            background: transparent;
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 25px;
+        }
+
+        .profile-card .card-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .profile-card .card-body {
+            padding: 25px;
+        }
+
+        .profile-image-container {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #667eea;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+        .profile-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .stat-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0 0;
+        }
+
+        .stat-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .stat-list li:last-child {
+            border-bottom: none;
+        }
+
+        .stat-list li i {
+            margin-right: 10px;
+            color: #667eea;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .info-item {
+            margin-bottom: 20px;
+        }
+
+        .info-item label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .info-item label i {
+            margin-right: 8px;
+            color: #667eea;
+        }
+
+        .info-item p {
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .image-upload-container {
+            text-align: center;
+            padding: 20px;
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .image-upload-container:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .preview-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="content-wrapper" style="padding: 20px;">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <h1><i class="fas fa-user-circle mr-2"></i>My Profile</h1>
+            <p class="mb-0 mt-1 opacity-75">Manage your account information</p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <i class="fas fa-check-circle mr-2"></i><span th:text="${success}">Success</span>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <i class="fas fa-exclamation-circle mr-2"></i><span th:text="${error}">Error</span>
+        </div>
+
+        <div class="row">
+            <!-- Profile Summary Card -->
+            <div class="col-md-4">
+                <div class="profile-card">
+                    <div class="profile-image-container">
+                        <img th:src="${user.getPhotosImagePath()}"
+                             class="profile-image"
+                             alt="Profile Picture"
+                             onerror="this.src='/images/user.jpg'">
+                        <h4 class="profile-name" th:text="${user.username}">User Name</h4>
+                        <span class="profile-badge" th:text="${user.role}">STUDENT</span>
+                        
+                        <ul class="stat-list">
+                            <li>
+                                <span><i class="fas fa-book-reader"></i>Enrolled Courses</span>
+                                <span class="stat-value" th:text="${enrolledCount} ?: '0'">0</span>
+                            </li>
+                            <li>
+                                <span><i class="fas fa-check-circle"></i>Completed</span>
+                                <span class="stat-value" th:text="${completedCourses} ?: '0'">0</span>
+                            </li>
+                            <li>
+                                <span><i class="fas fa-calendar"></i>Member Since</span>
+                                <span class="stat-value" th:text="${#temporals.format(user.createdAt, 'MMM yyyy')}">Date</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="profile-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-link mr-2"></i>Quick Links</h3>
+                    </div>
+                    <div class="card-body">
+                        <a th:href="@{/my-courses}" class="btn btn-outline-primary btn-block mb-2">
+                            <i class="fas fa-book-reader mr-2"></i>My Courses
+                        </a>
+                        <a th:href="@{/student/settings}" class="btn btn-outline-secondary btn-block mb-2">
+                            <i class="fas fa-cog mr-2"></i>Account Settings
+                        </a>
+                        <a th:href="@{/courses}" class="btn btn-outline-info btn-block">
+                            <i class="fas fa-search mr-2"></i>Browse Courses
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="profile-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-info-circle mr-2"></i>About Me</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-item">
+                            <label><i class="fas fa-briefcase"></i>Profession</label>
+                            <p th:text="${user.profession} ?: 'Not specified'">Profession</p>
+                        </div>
+                        <div class="info-item">
+                            <label><i class="fas fa-map-marker-alt"></i>Location</label>
+                            <p th:text="${user.location} ?: 'Not specified'">Location</p>
+                        </div>
+                        <div class="info-item">
+                            <label><i class="fas fa-envelope"></i>Email</label>
+                            <p th:text="${user.email}">email@example.com</p>
+                        </div>
+                        <div class="info-item mb-0">
+                            <label><i class="fas fa-phone"></i>Phone</label>
+                            <p th:text="${user.mobileNumber} ?: 'Not set'">Phone</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Profile Form -->
+            <div class="col-md-8">
+                <div class="profile-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-edit mr-2"></i>Edit Profile Information</h3>
+                    </div>
+                    <form th:action="@{/student/update-profile}" method="post" enctype="multipart/form-data">
+                        <div class="card-body">
+                            <!-- Profile Image Upload -->
+                            <div class="image-upload-container" onclick="document.getElementById('imageInput').click()">
+                                <img id="previewImage" 
+                                     th:src="${user.getPhotosImagePath()}" 
+                                     class="preview-img"
+                                     alt="Preview"
+                                     onerror="this.src='/images/user.jpg'">
+                                <p class="text-muted mb-0"><i class="fas fa-camera mr-2"></i>Click to change photo</p>
+                                <input type="file" id="imageInput" name="image" accept="image/*" style="display: none;">
+                            </div>
+
+                            <!-- Basic Info -->
+                            <h5 class="mb-3"><i class="fas fa-user mr-2 text-primary"></i>Basic Information</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Full Name <span class="text-danger">*</span></label>
+                                        <input type="text" name="fullName" class="form-control"
+                                               th:value="${user.username}" required
+                                               placeholder="Enter your full name">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Email <span class="text-danger">*</span></label>
+                                        <input type="email" name="email" class="form-control"
+                                               th:value="${user.email}" required
+                                               placeholder="Enter your email">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Phone Number</label>
+                                        <input type="text" name="mobileNumber" class="form-control"
+                                               th:value="${user.mobileNumber}"
+                                               placeholder="Enter your phone number">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Profession</label>
+                                        <input type="text" name="profession" class="form-control"
+                                               th:value="${user.profession}"
+                                               placeholder="e.g. Student, Developer">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Location</label>
+                                <input type="text" name="location" class="form-control"
+                                       th:value="${user.location}"
+                                       placeholder="e.g. Dhaka, Bangladesh">
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a th:href="@{/student/settings}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-lock mr-2"></i>Change Password
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save mr-2"></i>Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        // Image preview
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImage').src = e.target.result;
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+    </script>
+</th:block>
+</body>
+</html>

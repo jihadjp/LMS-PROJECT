@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Instructor Dashboard | LMS</title>
+    <style>
+        :root {
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --primary: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --radius: 12px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode {
+            --bg-card: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+        }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: var(--radius);
+            padding: 40px;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon.primary { background: rgba(79, 70, 229, 0.1); color: var(--primary); }
+        .stat-icon.success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .stat-icon.warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .stat-icon.info { background: rgba(59, 130, 246, 0.1); color: var(--info); }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .stat-trend {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .stat-trend.up {
+            color: var(--success);
+        }
+
+        .stat-trend.down {
+            color: var(--warning);
+        }
+
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card-header-custom {
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title-custom {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .table {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .table thead th {
+            background: rgba(79, 70, 229, 0.05);
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            padding: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .table tbody td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .table tbody tr:hover {
+            background: rgba(79, 70, 229, 0.02);
+        }
+
+        .course-thumb {
+            width: 60px;
+            height: 40px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        @media (max-width: 768px) {
+            .welcome-banner {
+                padding: 25px;
+            }
+
+            .welcome-title {
+                font-size: 1.5rem;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="content-header pt-4">
+        <div class="container-fluid">
+
+            <!-- Welcome Banner -->
+            <div class="welcome-banner">
+                <h1 class="welcome-title">
+                    Welcome back, <span th:text="${user.username}">Instructor</span>! 👋
+                </h1>
+                <p class="mb-0" style="font-size: 1.1rem; opacity: 0.9;">
+                    Here's what's happening with your courses today
+                </p>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value" th:text="${totalStudents ?: '0'}">1,234</div>
+                            <div class="stat-label">Total Students</div>
+                        </div>
+                        <div class="stat-icon primary">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                    </div>
+                    <div class="stat-trend up">
+                        <i class="fas fa-arrow-up mr-1"></i> 12% from last month
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value">
+                                <span th:text="${averageRating ?: '0.0'}">4.8</span>
+                                <i class="fas fa-star text-warning" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <div class="stat-label">Average Rating</div>
+                        </div>
+                        <div class="stat-icon warning">
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <div class="stat-trend up">
+                        <i class="fas fa-arrow-up mr-1"></i> +0.3 this month
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value" th:text="'৳' + ${monthlyEarnings ?: '0'}">৳45,000</div>
+                            <div class="stat-label">Monthly Earnings</div>
+                        </div>
+                        <div class="stat-icon success">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                    </div>
+                    <div class="stat-trend up">
+                        <i class="fas fa-arrow-up mr-1"></i> 18% increase
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value" th:text="${totalCourses ?: '0'}">12</div>
+                            <div class="stat-label">Published Courses</div>
+                        </div>
+                        <div class="stat-icon info">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                    </div>
+                    <div class="stat-trend">
+                        <i class="fas fa-plus mr-1"></i> 2 pending approval
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Sales Table -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="content-card">
+                        <div class="card-header-custom">
+                            <h3 class="card-title-custom">
+                                <i class="fas fa-shopping-cart mr-2 text-primary"></i> Recent Sales
+                            </h3>
+                            <a th:href="@{/instructor/earnings}" class="btn btn-sm btn-outline-primary">
+                                View All
+                            </a>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table mb-0">
+                                <thead>
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Student</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="enrollment : ${recentSales}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="/images/logo.jpg"
+                                                 alt="Course"
+                                                 class="course-thumb mr-3"
+                                                 onerror="this.src='/images/logo.jpg'">
+                                            <span th:text="${enrollment.course.course_name}">Java Masterclass</span>
+                                        </div>
+                                    </td>
+                                    <td th:text="${enrollment.user.username}">John Doe</td>
+                                    <td th:text="${#temporals.format(enrollment.enrollmentDate, 'dd MMM yyyy')}">15 Jan 2026</td>
+                                    <td>
+                                        <strong th:text="'৳' + ${enrollment.course.price}">৳999</strong>
+                                    </td>
+                                    <td>
+                                        <span th:class="${enrollment.completed ? 'badge badge-success' : 'badge badge-info'}" 
+                                              th:text="${enrollment.completed ? 'Completed' : 'In Progress'}">Completed</span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(recentSales)}">
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        No recent sales
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="content-card">
+                        <div class="card-header-custom">
+                            <h3 class="card-title-custom">
+                                <i class="fas fa-chart-pie mr-2 text-primary"></i> Quick Actions
+                            </h3>
+                        </div>
+                        <div class="p-4">
+                            <a th:href="@{/instructor/courses/create}"
+                               class="btn btn-primary btn-block mb-3">
+                                <i class="fas fa-plus mr-2"></i> Create New Course
+                            </a>
+                            <a th:href="@{/instructor/courses}"
+                               class="btn btn-outline-primary btn-block mb-3">
+                                <i class="fas fa-book mr-2"></i> My Courses
+                            </a>
+                            <a th:href="@{/instructor/students}"
+                               class="btn btn-outline-secondary btn-block mb-3">
+                                <i class="fas fa-users mr-2"></i> View Students
+                            </a>
+                            <a th:href="@{/instructor/earnings}"
+                               class="btn btn-outline-success btn-block">
+                                <i class="fas fa-chart-line mr-2"></i> Earnings Report
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="script">
+    <script>
+        // Add any dashboard-specific JavaScript here
+    </script>
+</th:block>
+
+</body>
+</html>

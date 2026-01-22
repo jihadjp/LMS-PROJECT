@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Settings | LMS</title>
+    <style>
+        :root {
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --primary: #4f46e5;
+            --success: #10b981;
+            --danger: #ef4444;
+            --radius: 12px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode {
+            --bg-card: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+        }
+
+        .settings-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: var(--radius);
+            padding: 30px;
+            color: white;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .settings-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .settings-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .settings-card .card-header {
+            background: transparent;
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 25px;
+        }
+
+        .settings-card .card-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .settings-card .card-body {
+            padding: 25px;
+        }
+
+        .nav-settings {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .nav-settings .nav-link {
+            color: var(--text-primary);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .nav-settings .nav-link:last-child {
+            border-bottom: none;
+        }
+
+        .nav-settings .nav-link:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .nav-settings .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .nav-settings .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border: none;
+        }
+
+        .info-box {
+            background: rgba(102, 126, 234, 0.1);
+            border-left: 4px solid #667eea;
+            border-radius: 0 8px 8px 0;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+
+        .info-box i {
+            color: #667eea;
+            margin-right: 10px;
+        }
+
+        .info-box p {
+            margin: 0;
+            color: var(--text-secondary);
+        }
+
+        .danger-zone {
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+
+        .danger-zone h5 {
+            color: #ef4444;
+        }
+
+        .password-strength {
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0;
+            transition: all 0.3s;
+        }
+
+        .password-strength-bar.weak { width: 33%; background: #ef4444; }
+        .password-strength-bar.medium { width: 66%; background: #f59e0b; }
+        .password-strength-bar.strong { width: 100%; background: #10b981; }
+
+        .account-info {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+        }
+
+        .account-info img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+
+        .account-info h5 {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .account-info p {
+            margin: 5px 0 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="content-wrapper" style="padding: 20px;">
+        <!-- Settings Header -->
+        <div class="settings-header">
+            <h1><i class="fas fa-cog mr-2"></i>Account Settings</h1>
+            <p class="mb-0 mt-1 opacity-75">Manage your account preferences and security</p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <i class="fas fa-check-circle mr-2"></i><span th:text="${success}">Success</span>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <i class="fas fa-exclamation-circle mr-2"></i><span th:text="${error}">Error</span>
+        </div>
+
+        <div class="row">
+            <!-- Settings Navigation -->
+            <div class="col-md-3">
+                <div class="nav-settings">
+                    <a href="#account" class="nav-link active" data-toggle="pill">
+                        <i class="fas fa-user"></i>Account
+                    </a>
+                    <a href="#security" class="nav-link" data-toggle="pill">
+                        <i class="fas fa-lock"></i>Security
+                    </a>
+                    <a href="#notifications" class="nav-link" data-toggle="pill">
+                        <i class="fas fa-bell"></i>Notifications
+                    </a>
+                    <a href="#preferences" class="nav-link" data-toggle="pill">
+                        <i class="fas fa-sliders-h"></i>Preferences
+                    </a>
+                </div>
+
+                <!-- Quick Profile Link -->
+                <div class="settings-card">
+                    <div class="card-body text-center">
+                        <img th:src="${user.getPhotosImagePath()}"
+                             class="rounded-circle mb-3"
+                             style="width: 80px; height: 80px; object-fit: cover;"
+                             alt="Profile"
+                             onerror="this.src='/images/user.jpg'">
+                        <h5 th:text="${user.username}">User Name</h5>
+                        <a th:href="@{/student/profile}" class="btn btn-outline-primary btn-sm btn-block">
+                            <i class="fas fa-edit mr-1"></i>Edit Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Content -->
+            <div class="col-md-9">
+                <div class="tab-content">
+
+                    <!-- Account Tab -->
+                    <div class="tab-pane fade show active" id="account">
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-user mr-2"></i>Account Information</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="info-box">
+                                    <i class="fas fa-info-circle"></i>
+                                    <p>To update your profile information (name, email, photo), please visit the 
+                                        <a th:href="@{/student/profile}">Profile Page</a>
+                                    </p>
+                                </div>
+
+                                <div class="account-info">
+                                    <img th:src="${user.getPhotosImagePath()}" 
+                                         alt="Profile"
+                                         onerror="this.src='/images/user.jpg'">
+                                    <div>
+                                        <h5 th:text="${user.username}">User Name</h5>
+                                        <p th:text="${user.email}">email@example.com</p>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label><strong>Account Status</strong></label>
+                                            <p>
+                                                <span class="badge badge-success"><i class="fas fa-check mr-1"></i>Active</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label><strong>Role</strong></label>
+                                            <p>
+                                                <span class="badge badge-primary" th:text="${user.role}">STUDENT</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label><strong>Member Since</strong></label>
+                                            <p th:text="${#temporals.format(user.createdAt, 'MMMM dd, yyyy')}">Date</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label><strong>Last Updated</strong></label>
+                                            <p th:text="${user.updatedAt != null ? #temporals.format(user.updatedAt, 'MMMM dd, yyyy') : 'Never'}">Date</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <div class="danger-zone">
+                                    <h5><i class="fas fa-exclamation-triangle mr-2"></i>Danger Zone</h5>
+                                    <p class="text-muted mb-3">
+                                        Account deletion is not available through this interface.
+                                        Please contact support if you need to delete your account.
+                                    </p>
+                                    <button class="btn btn-danger" disabled>
+                                        <i class="fas fa-trash mr-2"></i>Delete Account (Contact Support)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Tab -->
+                    <div class="tab-pane fade" id="security">
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-lock mr-2"></i>Change Password</h3>
+                            </div>
+                            <form th:action="@{/student/change-password}" method="post">
+                                <div class="card-body">
+                                    <div class="info-box">
+                                        <i class="fas fa-shield-alt"></i>
+                                        <p>For your security, password must be at least 6 characters long. Use a mix of letters, numbers, and symbols for a stronger password.</p>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Current Password <span class="text-danger">*</span></label>
+                                        <input type="password" name="currentPassword" 
+                                               class="form-control" required
+                                               placeholder="Enter your current password">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>New Password <span class="text-danger">*</span></label>
+                                        <input type="password" name="newPassword" id="newPassword"
+                                               class="form-control" required minlength="6"
+                                               placeholder="Enter your new password">
+                                        <div class="password-strength">
+                                            <div class="password-strength-bar" id="strengthBar"></div>
+                                        </div>
+                                        <small class="text-muted">Minimum 6 characters</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Confirm New Password <span class="text-danger">*</span></label>
+                                        <input type="password" id="confirmPassword"
+                                               class="form-control" required minlength="6"
+                                               placeholder="Confirm your new password">
+                                        <small id="passwordMatch" class="text-danger" style="display: none;">
+                                            Passwords do not match
+                                        </small>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary" id="changePasswordBtn">
+                                        <i class="fas fa-key mr-2"></i>Change Password
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Security Tips -->
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-lightbulb mr-2"></i>Security Tips</h3>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-3">
+                                        <i class="fas fa-check-circle text-success mr-2"></i>
+                                        Use a unique password that you don't use elsewhere
+                                    </li>
+                                    <li class="mb-3">
+                                        <i class="fas fa-check-circle text-success mr-2"></i>
+                                        Include uppercase letters, numbers, and symbols
+                                    </li>
+                                    <li class="mb-3">
+                                        <i class="fas fa-check-circle text-success mr-2"></i>
+                                        Avoid using personal information in passwords
+                                    </li>
+                                    <li>
+                                        <i class="fas fa-check-circle text-success mr-2"></i>
+                                        Change your password regularly for better security
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notifications Tab -->
+                    <div class="tab-pane fade" id="notifications">
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-bell mr-2"></i>Notification Preferences</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="info-box">
+                                    <i class="fas fa-info-circle"></i>
+                                    <p>Notification preferences are currently managed by the system. This feature will be available soon.</p>
+                                </div>
+
+                                <div class="custom-control custom-switch mb-3">
+                                    <input type="checkbox" class="custom-control-input" id="emailNotif" checked disabled>
+                                    <label class="custom-control-label" for="emailNotif">
+                                        <strong>Email Notifications</strong>
+                                        <p class="text-muted mb-0">Receive course updates via email</p>
+                                    </label>
+                                </div>
+
+                                <div class="custom-control custom-switch mb-3">
+                                    <input type="checkbox" class="custom-control-input" id="courseNotif" checked disabled>
+                                    <label class="custom-control-label" for="courseNotif">
+                                        <strong>Course Updates</strong>
+                                        <p class="text-muted mb-0">Get notified about new course content</p>
+                                    </label>
+                                </div>
+
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="promoNotif" disabled>
+                                    <label class="custom-control-label" for="promoNotif">
+                                        <strong>Promotional Emails</strong>
+                                        <p class="text-muted mb-0">Receive offers and promotions</p>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preferences Tab -->
+                    <div class="tab-pane fade" id="preferences">
+                        <div class="settings-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-sliders-h mr-2"></i>Display Preferences</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="info-box">
+                                    <i class="fas fa-info-circle"></i>
+                                    <p>Customize your learning experience. Some features may not be available yet.</p>
+                                </div>
+
+                                <div class="form-group">
+                                    <label><strong>Language</strong></label>
+                                    <select class="form-control" disabled>
+                                        <option selected>English</option>
+                                        <option>বাংলা (Bengali)</option>
+                                    </select>
+                                    <small class="text-muted">Language selection coming soon</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label><strong>Theme</strong></label>
+                                    <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+                                        <label class="btn btn-outline-primary active">
+                                            <input type="radio" name="theme" checked> <i class="fas fa-sun mr-1"></i>Light
+                                        </label>
+                                        <label class="btn btn-outline-primary">
+                                            <input type="radio" name="theme"> <i class="fas fa-moon mr-1"></i>Dark
+                                        </label>
+                                        <label class="btn btn-outline-primary">
+                                            <input type="radio" name="theme"> <i class="fas fa-desktop mr-1"></i>System
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">Use the theme toggle in the navbar for quick switching</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        // Password strength indicator
+        document.getElementById('newPassword').addEventListener('input', function() {
+            var password = this.value;
+            var strengthBar = document.getElementById('strengthBar');
+            
+            if (password.length === 0) {
+                strengthBar.className = 'password-strength-bar';
+                strengthBar.style.width = '0';
+            } else if (password.length < 6) {
+                strengthBar.className = 'password-strength-bar weak';
+            } else if (password.length < 10 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+                strengthBar.className = 'password-strength-bar medium';
+            } else {
+                strengthBar.className = 'password-strength-bar strong';
+            }
+        });
+
+        // Password match validation
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            var newPassword = document.getElementById('newPassword').value;
+            var confirmPassword = this.value;
+            var matchText = document.getElementById('passwordMatch');
+            var submitBtn = document.getElementById('changePasswordBtn');
+            
+            if (confirmPassword && newPassword !== confirmPassword) {
+                matchText.style.display = 'block';
+                submitBtn.disabled = true;
+            } else {
+                matchText.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</th:block>
+</body>
+</html>

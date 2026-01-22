@@ -1,0 +1,476 @@
+﻿Business Requirements Specification (BRS)
+
+
+Project Name: Learning Management System (LMS)
+Date: January 12, 2026
+Version: 1.0
+Author: Senior Business Analyst & Product Manager
+
+
+________________
+Table of Contents
+
+
+Business Requirements Specification (BRS)        1
+1. Executive Summary        3
+1.1 Project Overview        3
+1.2 Business Objectives        3
+1.3 Strategic Alignment        3
+2. Project Scope        4
+2.1 In-Scope (MVP Features Only)        4
+2.2 Explicitly Out-of-Scope (Deferred to Future Phases)        4
+2.3 Critical Assumptions        5
+3. Simplified Stakeholder Analysis        6
+3.1 Primary User Roles        6
+Administrator        6
+Instructor        6
+Student        6
+4. Simplified Business Process        7
+4.1 Core User Journey        7
+5. High-Level Functional Requirements (MVP Only)        8
+5.1 Authentication & User Management        8
+5.2 Course Management        8
+5.3 Enrollment & Payment        9
+5.4 Learning Experience        10
+5.5 Rating System        10
+5.6 Admin Functions        11
+6. Non-Functional Requirements (MVP)        13
+6.1 Performance        13
+6.2 Security        13
+6.3 Usability        13
+6.4 Reliability        13
+7. Technical Architecture (Simplified)        14
+7.1 Technology Stack        14
+7.2 Database Schema (Core Tables Only)        14
+8. Success Metrics (First 30 Days Post-Launch)        15
+9. Risk Management        16
+10. Constraints & Trade-offs        17
+Appendix A: Priority Framework        18
+      Document Approval        18
+
+
+________________
+1. Executive Summary
+1.1 Project Overview
+This document outlines the business requirements for developing a Minimum Viable Product (MVP) Learning Management System in an accelerated one-month timeline. The platform will focus on core functionality for delivering skill-based education through recorded courses, with essential features for instructors, students, and administrators.
+1.2 Business Objectives
+* Launch a functional e-learning platform with core features within 30 days
+* Support asynchronous (recorded) learning with basic course management
+* Enable course monetization through integrated payment processing
+* Provide essential learning experience across desktop and mobile browsers
+* Support 1,000+ concurrent users at launch
+* Achieve a functional MVP that can be iteratively improved post-launch
+1.3 Strategic Alignment
+This accelerated MVP approach prioritizes speed-to-market while maintaining core functionality necessary for a viable learning platform. The focus is on proven, essential features that deliver immediate value to users.
+
+
+________________
+2. Project Scope
+2.1 In-Scope (MVP Features Only)
+Core Platform Features:
+* User registration and authentication (Student, Instructor, Admin)
+* Basic course creation and publishing
+* Video content hosting and streaming
+* Simple payment processing for course purchases
+* Basic enrollment workflow
+* Student progress tracking (completion percentage)
+* Simple course rating system (star ratings only)
+* Basic admin dashboard for user and course management
+* Instructor dashboard for course management
+* Student portal for browsing and learning
+Technical Deliverables:
+* RESTful API backend (Java Spring Boot)
+* Server-side rendered admin panel (Thymeleaf)
+* Single-page application for students (React.js)
+* Relational database (MySQL/PostgreSQL)
+* JWT authentication
+* Payment gateway integration (SSLCommerz OR Shurjopay - choose one)
+* Basic video streaming (cloud storage integration)
+Content Types:
+* Pre-recorded video lectures
+* Basic downloadable materials (PDFs)
+* Simple quizzes (optional, time permitting)
+* Basic completion certificates (auto-generated)
+2.2 Explicitly Out-of-Scope (Deferred to Future Phases)
+Features NOT included in 1-month MVP:
+* Live class integration
+* Advanced video features (multiple resolutions, adaptive streaming)
+* Video conferencing integration
+* Course reviews (written feedback)
+* Advanced analytics and reporting
+* Instructor earnings/payout system (manual processing initially)
+* Social login (Google OAuth)
+* Mobile native applications
+* Advanced search and filtering
+* Course preview videos
+* Discount/coupon system
+* Email notifications (except critical ones)
+* Certificate customization
+* Video DRM/watermarking
+* Multiple payment gateways
+* Multi-language support
+* Discussion forums
+* Advanced admin analytics
+* Instructor application/approval workflow (manual initially)
+2.3 Critical Assumptions
+* Pre-existing payment gateway account with SSLCommerz or Shurjopay
+* Cloud infrastructure already provisioned (AWS/Azure/GCP account ready)
+* Development team fully dedicated for 30 days
+* No major scope changes during development
+* Instructors will provide content in ready-to-use MP4 format
+* Basic email service available (AWS SES, SendGrid, or SMTP)
+* Minimal design requirements (use template/framework like Bootstrap or Material UI)
+
+
+________________
+3. Simplified Stakeholder Analysis
+3.1 Primary User Roles
+Administrator
+Core Responsibilities:
+* Approve/reject courses
+* Manage user accounts (activate/deactivate)
+* Monitor platform activity
+* Handle payment verification (initially manual)
+Instructor
+Core Responsibilities:
+* Create and upload courses
+* Upload video content
+* Set course pricing
+* View enrolled students
+Student
+Core Responsibilities:
+* Browse and search courses
+* Purchase and enroll in courses
+* Watch video content
+* Track learning progress
+
+
+________________
+4. Simplified Business Process
+4.1 Core User Journey
+Instructor Flow:
+1. Register as instructor (admin manually approves)
+2. Create course (title, description, price)
+3. Upload videos and organize into modules
+4. Submit for approval
+5. Admin approves → Course published
+6. Students can enroll
+Student Flow:
+1. Register account
+2. Browse course catalog
+3. Select course → View details
+4. Click "Enroll" (free) or "Buy Now" (paid)
+5. For paid: Complete payment via gateway
+6. Access course → Watch videos
+7. Progress tracked automatically
+8. Complete course → Receive certificate
+
+
+________________
+5. High-Level Functional Requirements (MVP Only)
+5.1 Authentication & User Management
+FR-AUTH-001: User Registration & Login
+* Priority: Critical
+* Simple email/password registration
+* Email verification (basic token-based)
+* JWT authentication (access token only, 7-day expiration)
+* Password reset via email link
+* Three user roles: Admin, Instructor, Student
+Acceptance Criteria:
+* Users can register and receive verification email
+* Login returns JWT token
+* Password reset works via email link
+* Role-based access enforced on backend
+5.2 Course Management
+FR-COURSE-001: Basic Course Creation
+* Priority: Critical
+* Course fields: Title, Description, Category, Price, Thumbnail
+* Simple module/lesson structure (max 2 levels: Course → Lessons)
+* Video upload to cloud storage (S3/Azure Blob)
+* Status: Draft, Pending, Published, Rejected
+* Instructor can only edit Draft courses
+Acceptance Criteria:
+* Instructor can create course with basic metadata
+* Videos upload successfully to cloud storage
+* Course submitted for admin approval
+* Published courses appear in catalog
+FR-COURSE-002: Video Streaming
+* Priority: Critical
+* Direct video streaming from cloud storage
+* Basic HTML5 video player
+* Progress saved (last watched position)
+* No transcoding required (accept only MP4 format)
+Acceptance Criteria:
+* Videos play in browser
+* Playback position saved
+* Works on Chrome, Firefox, Safari, Edge
+FR-COURSE-003: Simple Course Catalog
+* Priority: High
+* List all published courses
+* Basic search (title only)
+* Filter by category
+* Sort by: Newest, Price (low to high)
+Acceptance Criteria:
+* Catalog displays all published courses
+* Search returns relevant results
+* Filters work correctly
+5.3 Enrollment & Payment
+FR-PAY-001: Payment Processing
+* Priority: Critical
+* Integration with ONE payment gateway (SSLCommerz OR Shurjopay)
+* Support card payments and mobile banking
+* Payment flow: Course → Checkout → Gateway → Success/Failure
+* On success: Auto-enroll student + send confirmation email
+* Store transaction details (transaction ID, amount, status)
+Acceptance Criteria:
+* Payment redirects to gateway correctly
+* Successful payment enrolls student automatically
+* Failed payment shows error message
+* Transaction data stored in database
+FR-PAY-002: Simple Enrollment
+* Priority: Critical
+* Free courses: One-click enrollment
+* Paid courses: Redirect to payment
+* Enrollment creates record with timestamp
+* Student immediately accesses course content
+Acceptance Criteria:
+* Free enrollment works without payment
+* Paid enrollment requires successful payment
+* Enrolled students see course in "My Courses"
+5.4 Learning Experience
+FR-LEARN-001: Student Dashboard
+* Priority: High
+* Display enrolled courses
+* Show progress percentage per course
+* "Continue Learning" button (goes to last watched lesson)
+Acceptance Criteria:
+* Dashboard shows all enrolled courses
+* Progress displays correctly
+* Continue learning works
+FR-LEARN-002: Course Player
+* Priority: Critical
+* Video player with basic controls
+* Lesson navigation (previous/next)
+* Mark lesson as complete (manual checkbox)
+* Progress calculation: (Completed lessons / Total lessons) × 100
+Acceptance Criteria:
+* Videos play smoothly
+* Lesson navigation works
+* Progress updates in real-time
+* Completion percentage accurate
+FR-LEARN-003: Basic Certificate
+* Priority: Medium
+* Auto-generate PDF certificate when course 100% complete
+* Include: Student name, Course title, Completion date
+* Downloadable from student dashboard
+* Simple template design
+Acceptance Criteria:
+* Certificate generates on completion
+* PDF downloads successfully
+* Contains correct information
+5.5 Rating System
+FR-RATE-001: Simple Course Rating
+* Priority: Low (implement if time permits)
+* 1-5 star rating only (no written reviews)
+* One rating per student per course
+* Display average rating on course card
+* Only enrolled students can rate
+Acceptance Criteria:
+* Students can submit star rating
+* Average rating displays correctly
+* Cannot rate without enrollment
+5.6 Admin Functions
+FR-ADMIN-001: User Management
+* Priority: High
+* View all users (table with search)
+* Activate/deactivate accounts
+* Change user roles (Student ↔ Instructor)
+Acceptance Criteria:
+* Admin can view user list
+* Can search users by email/name
+* Can activate/deactivate accounts
+* Role changes apply immediately
+FR-ADMIN-002: Course Approval
+* Priority: Critical
+* View courses pending approval
+* Preview course content
+* Approve or reject with reason
+* Approved courses auto-publish
+Acceptance Criteria:
+* Pending courses list displays
+* Admin can preview course content
+* Approval/rejection works correctly
+* Instructor notified via email
+FR-ADMIN-003: Basic Dashboard
+* Priority: Low
+* Display key metrics: Total users, Total courses, Total revenue
+* Simple tables (no charts for MVP)
+Acceptance Criteria:
+* Dashboard shows basic statistics
+* Numbers update correctly
+
+
+________________
+6. Non-Functional Requirements (MVP)
+6.1 Performance
+* Page Load: < 5 seconds on 3G connection
+* API Response: < 1 second for 95% of requests
+* Video Start: < 5 seconds
+* Concurrent Users: Support 1,000 active users
+6.2 Security
+* HTTPS only (SSL certificate required)
+* Password hashing (BCrypt)
+* JWT token authentication
+* SQL injection prevention (use JPA/Hibernate)
+* Basic XSS protection (input sanitization)
+* CSRF protection on forms
+6.3 Usability
+* Responsive design (works on desktop and mobile browsers)
+* Minimum resolution: 375px width
+* Browser support: Chrome, Firefox, Safari, Edge (latest versions)
+* Clean, simple UI using Bootstrap or Material UI templates
+6.4 Reliability
+* Uptime Target: 95% (initial launch)
+* Daily database backups
+* Error logging (console logs acceptable for MVP)
+* Basic error messages for users
+
+
+________________
+7. Technical Architecture (Simplified)
+7.1 Technology Stack
+Backend:
+* Java 17 + Spring Boot 3.x
+* Spring Security (JWT)
+* Spring Data JPA
+* MySQL 8.0
+* Maven for build
+Frontend - Admin:
+* Thymeleaf + Bootstrap 5
+* jQuery (minimal JavaScript)
+Frontend - Student/Public:
+* React 18 + React Router
+* Axios for API calls
+* Material-UI or Bootstrap React components
+* No state management library (use Context API if needed)
+Infrastructure:
+* Cloud storage: AWS S3 or Azure Blob Storage
+* Email: AWS SES or SendGrid
+* Hosting: Single server initially (Docker containers optional)
+* Database: Managed service (AWS RDS, Azure Database, etc.)
+7.2 Database Schema (Core Tables Only)
+Essential Tables:
+1. users (id, email, password, role, status, created_at)
+2. courses (id, instructor_id, title, description, category, price, thumbnail_url, status, created_at)
+3. lessons (id, course_id, title, video_url, duration, order_index)
+4. enrollments (id, student_id, course_id, enrolled_at, progress_percentage, completed)
+5. lesson_progress (id, enrollment_id, lesson_id, completed, last_watched_position)
+6. transactions (id, student_id, course_id, amount, transaction_id, gateway, status, created_at)
+7. ratings (id, student_id, course_id, rating, created_at)
+8. certificates (id, enrollment_id, certificate_url, issued_at)
+8. Success Metrics (First 30 Days Post-Launch)
+Metric
+	Target
+	Platform Uptime
+	> 95%
+	Total Registered Users
+	100+ users
+	Published Courses
+	10+ courses
+	Paid Enrollments
+	20+ transactions
+	Page Load Time
+	< 5 seconds
+	Critical Bugs
+	0 (Must fix immediately)
+	Payment Success Rate
+	> 90%
+	________________
+9. Risk Management
+Risk
+	Probability
+	Impact
+	Mitigation Strategy
+	Payment gateway integration delays
+	Medium
+	High
+	Start integration early (Week 2), have developer docs ready.
+	Video upload/streaming issues
+	Medium
+	High
+	Test cloud storage integration in Week 1; use simple direct streaming.
+	Scope creep
+	High
+	Critical
+	Strict "no new features" policy; defer all non-MVP requests.
+	Testing time insufficient
+	High
+	High
+	Test continuously during development, not just at the end.
+	Team availability issues
+	Medium
+	Critical
+	Ensure team 100% dedicated; have backup developers identified.
+	Third-party service downtime
+	Low
+	Medium
+	Have a fallback plan (e.g., manual processing temporarily).
+	10. Constraints & Trade-offs
+To achieve 1-month delivery, we accept:
+1. Simplified features: Only core MVP functionality
+2. Manual processes: Some admin tasks manual initially (instructor approval, payouts)
+3. Basic UI: Template-based design, not custom
+4. Limited testing: Manual testing only, no automated tests in MVP
+5. Single payment gateway: Only one option initially
+6. No advanced analytics: Basic counts only
+7. Minimal notifications: Only critical emails
+8. Direct video streaming: No transcoding or adaptive quality
+9. Simple certificate: Basic template, no customization
+10. Documentation debt: Minimal documentation, improved post-launch
+These trade-offs are acceptable for speed-to-market and will be addressed in subsequent iterations.
+
+
+________________
+Appendix A: Priority Framework
+MUST HAVE (Critical):
+* Authentication & authorization
+* Course creation & publishing
+* Video upload & streaming
+* Payment processing
+* Enrollment workflow
+* Course player & progress tracking
+* Admin course approval
+SHOULD HAVE (High Priority):
+* Course catalog & search
+* Student dashboard
+* Instructor dashboard
+* User management
+* Basic certificates
+COULD HAVE (Medium Priority):
+* Rating system
+* Admin analytics dashboard
+* Email notifications
+WON'T HAVE (Deferred):
+* Live classes
+* Advanced video features
+* Written reviews
+* Social login
+* Discount system
+* Mobile apps
+Document Approval
+Role
+	Name
+	Signature
+	Date
+	Product Owner
+	_________________
+	_________________
+	_________
+	Technical Lead
+	_________________
+	_________________
+	_________
+	Business Sponsor
+	_________________
+	_________________
+	_________

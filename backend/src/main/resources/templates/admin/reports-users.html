@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>User Reports | Admin</title>
+    <style>
+        .report-card {
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .stat-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 15px;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        .stat-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        .progress-custom {
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .user-growth {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0"><i class="fas fa-chart-pie mr-2"></i>User Reports</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="#">Reports</a></li>
+                        <li class="breadcrumb-item active">User Summary</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-lg-3 col-6">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-muted mb-1">Total Users</p>
+                                    <h2 class="mb-0 font-weight-bold" th:text="${totalUsers ?: 0}">0</h2>
+                                </div>
+                                <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-muted mb-1">Active Users</p>
+                                    <h2 class="mb-0 font-weight-bold text-success" th:text="${activeUsers ?: 0}">0</h2>
+                                </div>
+                                <div class="stat-icon bg-success bg-opacity-10 text-success">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-muted mb-1">Instructors</p>
+                                    <h2 class="mb-0 font-weight-bold text-warning" th:text="${totalInstructors ?: 0}">0</h2>
+                                </div>
+                                <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                                    <i class="fas fa-chalkboard-teacher"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="card stat-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-muted mb-1">Students</p>
+                                    <h2 class="mb-0 font-weight-bold text-info" th:text="${totalStudents ?: 0}">0</h2>
+                                </div>
+                                <div class="stat-icon bg-info bg-opacity-10 text-info">
+                                    <i class="fas fa-user-graduate"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- User Distribution Chart -->
+                <div class="col-md-6">
+                    <div class="card report-card h-100">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-chart-pie mr-2"></i>User Distribution by Role
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="userRoleChart"></canvas>
+                            </div>
+                            
+                            <!-- Legend -->
+                            <div class="row mt-4">
+                                <div class="col-4 text-center">
+                                    <span class="badge badge-primary p-2">Admins</span>
+                                    <h4 class="mt-2" th:text="${totalAdmins ?: 0}">0</h4>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <span class="badge badge-warning p-2">Instructors</span>
+                                    <h4 class="mt-2" th:text="${totalInstructors ?: 0}">0</h4>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <span class="badge badge-info p-2">Students</span>
+                                    <h4 class="mt-2" th:text="${totalStudents ?: 0}">0</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Activity -->
+                <div class="col-md-6">
+                    <div class="card report-card h-100">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-chart-bar mr-2"></i>User Activity Status
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Active Users</span>
+                                    <span th:text="${activeUsers ?: 0}">0</span>
+                                </div>
+                                <div class="progress progress-custom">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         th:style="'width: ' + ${totalUsers > 0 ? (activeUsers * 100 / totalUsers) : 0} + '%'">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Inactive Users</span>
+                                    <span th:text="${(totalUsers ?: 0) - (activeUsers ?: 0)}">0</span>
+                                </div>
+                                <div class="progress progress-custom">
+                                    <div class="progress-bar bg-danger" role="progressbar"
+                                         th:style="'width: ' + ${totalUsers > 0 ? ((totalUsers - activeUsers) * 100 / totalUsers) : 0} + '%'">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <div class="user-growth mt-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <p class="mb-1 opacity-75">Total Registered</p>
+                                        <h2 class="mb-0" th:text="${totalUsers ?: 0}">0</h2>
+                                    </div>
+                                    <i class="fas fa-arrow-up fa-2x opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Users Table -->
+            <div class="card report-card mt-4">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-clock mr-2"></i>Recent Registrations
+                    </h3>
+                    <div class="card-tools">
+                        <a th:href="@{/admin/users}" class="btn btn-sm btn-primary">
+                            View All <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body table-responsive p-0">
+                    <table class="table table-hover">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user : ${recentUsers}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img th:src="${user.getPhotosImagePath() ?: '/images/user.jpg'}" 
+                                             class="rounded-circle mr-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                        <strong th:text="${user.username}">Username</strong>
+                                    </div>
+                                </td>
+                                <td th:text="${user.email}">email@example.com</td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${user.role.name() == 'ADMIN' ? 'badge-danger' : 
+                                                          (user.role.name() == 'INSTRUCTOR' ? 'badge-warning' : 'badge-info')}"
+                                          th:text="${user.role}">ROLE</span>
+                                </td>
+                                <td>
+                                    <span th:if="${user.isActive}" class="badge badge-success">
+                                        <i class="fas fa-check mr-1"></i>Active
+                                    </span>
+                                    <span th:unless="${user.isActive}" class="badge badge-secondary">
+                                        <i class="fas fa-times mr-1"></i>Inactive
+                                    </span>
+                                </td>
+                                <td th:text="${#temporals.format(user.createdAt, 'dd MMM yyyy')}">Date</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        const totalAdmins = /*[[${totalAdmins ?: 0}]]*/ 0;
+        const totalInstructors = /*[[${totalInstructors ?: 0}]]*/ 0;
+        const totalStudents = /*[[${totalStudents ?: 0}]]*/ 0;
+
+        // User Role Distribution Chart
+        const ctx = document.getElementById('userRoleChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Admins', 'Instructors', 'Students'],
+                datasets: [{
+                    data: [totalAdmins, totalInstructors, totalStudents],
+                    backgroundColor: [
+                        '#dc3545',
+                        '#ffc107',
+                        '#17a2b8'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+    </script>
+</th:block>
+
+</body>
+</html>

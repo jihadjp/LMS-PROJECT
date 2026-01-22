@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$LAYOUT_TITLE | $CONTENT_TITLE">Learning Management System</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css">
+
+    <!-- AdminLTE -->
+    <link rel="stylesheet" href="/dist/css/adminlte.min.css">
+
+    <!-- DataTables -->
+    <link rel="stylesheet" href="/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+
+    <!-- Chart.js -->
+    <script src="/plugins/chart.js/Chart.min.js"></script>
+
+    <style>
+        /* =========================================
+           THEME VARIABLES (DYNAMIC)
+           ========================================= */
+        :root {
+            /* Light Mode (Default) */
+            --bg-color: #f3f4f6;
+            --text-color: #1f2937;
+            --text-muted: #64748b;
+
+            /* Glassmorphism Light */
+            --glass-bg: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.05);
+            --bg-card: #ffffff;
+            --border-color: rgba(0, 0, 0, 0.1);
+
+            /* Sidebar Light */
+            --sidebar-bg: rgba(255, 255, 255, 0.9);
+            --sidebar-active: rgba(79, 70, 229, 0.1);
+            --sidebar-text: #334155;
+
+            /* Brand Colors */
+            --primary: #4f46e5;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --secondary: #6b7280;
+            --text-secondary: #6b7280;
+        }
+
+        /* Dark Mode Override */
+        body.dark-mode {
+            --bg-color: #0f172a; /* Dark Slate */
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+
+            /* Glassmorphism Dark */
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --bg-card: rgba(30, 41, 59, 0.9);
+            --border-color: rgba(255, 255, 255, 0.1);
+
+            /* Sidebar Dark */
+            --sidebar-bg: rgba(15, 23, 42, 0.95);
+            --sidebar-active: rgba(79, 70, 229, 0.2);
+            --sidebar-text: #e2e8f0;
+
+            --text-secondary: #94a3b8;
+        }
+
+        /* =========================================
+           GLOBAL STYLES & OVERRIDES
+           ========================================= */
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Content Wrapper Transparency */
+        .content-wrapper {
+            background: transparent !important;
+        }
+
+        /* Glass Card Style (Global) */
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            color: var(--text-color);
+            border-radius: 12px;
+        }
+
+        .card-header {
+            border-bottom: 1px solid var(--glass-border);
+            background: transparent;
+            color: var(--text-color);
+        }
+
+        .card-title {
+            color: var(--text-color) !important;
+        }
+
+        /* Small Box (Dashboard Widgets) */
+        .small-box {
+            border-radius: 12px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .small-box > .inner {
+            color: #ffffff;
+        }
+
+        .small-box .icon {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .small-box-footer {
+            background-color: rgba(0, 0, 0, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Sidebar Overrides */
+        .main-sidebar {
+            background: var(--sidebar-bg) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-right: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+        }
+
+        .main-sidebar .brand-link {
+            border-bottom: 1px solid var(--glass-border) !important;
+            color: var(--text-color) !important;
+        }
+
+        /* Header Overrides */
+        .main-header {
+            background: var(--glass-bg) !important;
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border) !important;
+        }
+
+        .main-header .nav-link {
+            color: var(--text-color) !important;
+        }
+
+        /* Footer */
+        .main-footer {
+            background: transparent !important;
+            border-top: 1px solid var(--glass-border) !important;
+            color: var(--text-muted);
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: transparent;
+            margin: 0;
+        }
+
+        .breadcrumb-item a {
+            color: var(--primary);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--text-muted);
+        }
+
+        /* Content Header */
+        .content-header h1 {
+            color: var(--text-color);
+        }
+
+        /* Tables (DataTables) */
+        body.dark-mode .table {
+            color: var(--text-color);
+        }
+
+        body.dark-mode .table-hover tbody tr:hover {
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        body.dark-mode .page-item.disabled .page-link {
+            background-color: var(--glass-bg);
+            border-color: var(--glass-border);
+        }
+
+        body.dark-mode .page-link {
+            background-color: var(--glass-bg);
+            border-color: var(--glass-border);
+            color: var(--primary);
+        }
+
+        /* Forms */
+        body.dark-mode .form-control {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        body.dark-mode .form-control:focus {
+            background-color: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
+            color: var(--text-color);
+        }
+
+        body.dark-mode .custom-file-label {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        body.dark-mode select.form-control option {
+            background-color: #1e293b;
+            color: var(--text-color);
+        }
+
+        /* Alerts */
+        .alert {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 8px;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background-color: #4338ca;
+            border-color: #4338ca;
+        }
+    </style>
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
+
+<!-- Initialize theme from localStorage before rendering -->
+<script>
+    (function() {
+        const savedTheme = localStorage.getItem('lms_theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+    })();
+</script>
+
+<div class="wrapper">
+
+    <!-- Header -->
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <!-- Content Wrapper -->
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="container-fluid">
+                <div layout:fragment="content"></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</div>
+
+<!-- jQuery -->
+<script src="/plugins/jquery/jquery.min.js"></script>
+
+<!-- Bootstrap Bundle -->
+<script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- AdminLTE -->
+<script src="/dist/js/adminlte.min.js"></script>
+
+<!-- DataTables -->
+<script src="/plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+<script src="/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+
+<!-- Page-specific scripts -->
+<th:block layout:fragment="script"></th:block>
+
+<!-- Theme Sync Script -->
+<script>
+    $(document).ready(function() {
+        // Sync theme icon on page load
+        const body = $('body');
+        const headerThemeIcon = $('#headerThemeIcon');
+
+        if (body.hasClass('dark-mode')) {
+            if (headerThemeIcon.length) {
+                headerThemeIcon.removeClass('fa-moon').addClass('fa-sun');
+            }
+        } else {
+            if (headerThemeIcon.length) {
+                headerThemeIcon.removeClass('fa-sun').addClass('fa-moon');
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

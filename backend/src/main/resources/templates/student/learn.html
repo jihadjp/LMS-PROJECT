@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout_without_sidebar_and_header}">
+<head>
+    <title th:text="${course.course_name} + ' - Learning'">Learning</title>
+    <style>
+        body {
+            background: #1a1a2e;
+        }
+        .learn-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .learn-header {
+            background: #16213e;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #0f3460;
+        }
+        .learn-header .course-title {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        .learn-header .back-btn {
+            color: #e94560;
+            text-decoration: none;
+        }
+        .learn-header .back-btn:hover {
+            color: #ff6b6b;
+        }
+        .learn-main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        .video-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0f0f23;
+        }
+        .video-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+        .video-container iframe,
+        .video-container video {
+            width: 100%;
+            height: 100%;
+        }
+        .video-placeholder {
+            text-align: center;
+            color: #666;
+        }
+        .video-placeholder i {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+        .video-info {
+            background: #16213e;
+            padding: 20px;
+            color: white;
+        }
+        .sidebar-section {
+            width: 350px;
+            background: #16213e;
+            border-left: 1px solid #0f3460;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid #0f3460;
+        }
+        .sidebar-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            background: transparent;
+        }
+        .sidebar-tab:hover {
+            color: #e94560;
+        }
+        .sidebar-tab.active {
+            color: #e94560;
+            border-bottom: 2px solid #e94560;
+        }
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+        .curriculum-section {
+            border-bottom: 1px solid #0f3460;
+        }
+        .section-header {
+            padding: 15px;
+            background: #1a1a2e;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .section-header:hover {
+            background: #0f3460;
+        }
+        .lecture-item {
+            padding: 12px 15px 12px 25px;
+            display: flex;
+            align-items: center;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lecture-item:hover {
+            background: #0f3460;
+            color: white;
+        }
+        .lecture-item.active {
+            background: #e94560;
+            color: white;
+        }
+        .lecture-item.completed {
+            color: #28a745;
+        }
+        .lecture-item i {
+            margin-right: 10px;
+            width: 20px;
+        }
+        .progress-bar-container {
+            padding: 15px;
+            background: #1a1a2e;
+            border-bottom: 1px solid #0f3460;
+        }
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            color: #888;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+        .progress {
+            height: 6px;
+            border-radius: 3px;
+            background: #0f3460;
+        }
+        .progress-bar {
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+        }
+        .notes-section {
+            padding: 15px;
+        }
+        .notes-section textarea {
+            width: 100%;
+            height: 200px;
+            background: #1a1a2e;
+            border: 1px solid #0f3460;
+            border-radius: 8px;
+            color: white;
+            padding: 15px;
+            resize: none;
+        }
+        .notes-section textarea::placeholder {
+            color: #666;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: #1a1a2e;
+            border-top: 1px solid #0f3460;
+        }
+        .action-buttons .btn {
+            flex: 1;
+        }
+        .btn-learn {
+            background: #e94560;
+            border: none;
+            color: white;
+        }
+        .btn-learn:hover {
+            background: #ff6b6b;
+            color: white;
+        }
+        .btn-outline-learn {
+            border: 1px solid #e94560;
+            color: #e94560;
+            background: transparent;
+        }
+        .btn-outline-learn:hover {
+            background: #e94560;
+            color: white;
+        }
+        /* Scrollbar styling */
+        .sidebar-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar-content::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+        .sidebar-content::-webkit-scrollbar-thumb {
+            background: #0f3460;
+            border-radius: 3px;
+        }
+        @media (max-width: 991px) {
+            .learn-main {
+                flex-direction: column;
+            }
+            .sidebar-section {
+                width: 100%;
+                height: 50%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content" class="learn-container">
+
+    <!-- Header -->
+    <div class="learn-header">
+        <a th:href="@{/my-courses}" class="back-btn">
+            <i class="fas fa-arrow-left mr-2"></i>Back to My Courses
+        </a>
+        <span class="course-title" th:text="${course.course_name}">Course Title</span>
+        <div>
+            <span class="text-white-50 mr-3">
+                <span th:text="${progress != null ? progress.percentage : 0}">0</span>% Complete
+            </span>
+            <a th:href="@{/courses/{id}(id=${course.course_id})}" class="btn btn-sm btn-outline-light">
+                <i class="fas fa-info-circle mr-1"></i>Details
+            </a>
+        </div>
+    </div>
+
+    <div class="learn-main">
+        <!-- Video/Content Section -->
+        <div class="video-section">
+            <div class="video-container">
+                <div th:if="${course.y_link != null and !course.y_link.isEmpty()}">
+                    <iframe 
+                        th:src="${course.y_link.replace('watch?v=', 'embed/')}"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                <div th:unless="${course.y_link != null and !course.y_link.isEmpty()}" class="video-placeholder">
+                    <i class="fas fa-video-slash"></i>
+                    <h4>No Video Available</h4>
+                    <p>This course doesn't have a video yet.</p>
+                </div>
+            </div>
+            
+            <div class="video-info">
+                <h4 th:text="${course.course_name}">Lecture Title</h4>
+                <p class="text-muted mb-0">
+                    <i class="fas fa-user-tie mr-2"></i>
+                    <span th:text="${course.instructorUser != null ? course.instructorUser.name : course.instructor}">Instructor</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar-section">
+            <!-- Tabs -->
+            <div class="sidebar-tabs">
+                <button class="sidebar-tab active" data-tab="curriculum">
+                    <i class="fas fa-list mr-2"></i>Curriculum
+                </button>
+                <button class="sidebar-tab" data-tab="notes">
+                    <i class="fas fa-sticky-note mr-2"></i>Notes
+                </button>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-bar-container">
+                <div class="progress-text">
+                    <span>Your Progress</span>
+                    <span th:text="${progress != null ? progress.percentage : 0} + '%'">0%</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar" 
+                         th:style="'width: ' + ${progress != null ? progress.percentage : 0} + '%'">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content -->
+            <div class="sidebar-content">
+                <!-- Curriculum Tab -->
+                <div id="curriculum-content">
+                    <div class="curriculum-section">
+                        <div class="section-header" data-toggle="collapse" data-target="#section1">
+                            <span>
+                                <i class="fas fa-folder-open mr-2"></i>
+                                Course Content
+                            </span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div id="section1" class="collapse show">
+                            <div class="lecture-item active">
+                                <i class="fas fa-play-circle"></i>
+                                <span>Main Lecture</span>
+                            </div>
+                            <!-- Additional lectures can be dynamically loaded -->
+                        </div>
+                    </div>
+                    
+                    <div class="curriculum-section">
+                        <div class="section-header" data-toggle="collapse" data-target="#section2">
+                            <span>
+                                <i class="fas fa-folder mr-2"></i>
+                                Resources
+                            </span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div id="section2" class="collapse">
+                            <div class="lecture-item">
+                                <i class="fas fa-file-pdf"></i>
+                                <span>Course Materials</span>
+                            </div>
+                            <div class="lecture-item">
+                                <i class="fas fa-link"></i>
+                                <span>Additional Links</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes Tab -->
+                <div id="notes-content" style="display: none;">
+                    <div class="notes-section">
+                        <textarea placeholder="Take notes while learning..."></textarea>
+                        <button class="btn btn-learn btn-block mt-3">
+                            <i class="fas fa-save mr-2"></i>Save Notes
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <form th:action="@{/learn/{id}/complete(id=${course.course_id})}" method="post" style="flex: 1;">
+                    <button type="submit" class="btn btn-learn btn-block" 
+                            th:disabled="${learning.completed}">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span th:text="${learning.completed} ? 'Completed' : 'Mark Complete'">Mark Complete</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<th:block layout:fragment="script">
+    <script>
+        $(document).ready(function() {
+            // Tab switching
+            $('.sidebar-tab').on('click', function() {
+                const tab = $(this).data('tab');
+                
+                $('.sidebar-tab').removeClass('active');
+                $(this).addClass('active');
+                
+                if (tab === 'curriculum') {
+                    $('#curriculum-content').show();
+                    $('#notes-content').hide();
+                } else {
+                    $('#curriculum-content').hide();
+                    $('#notes-content').show();
+                }
+            });
+            
+            // Section collapse toggle
+            $('.section-header').on('click', function() {
+                const icon = $(this).find('.fa-chevron-down, .fa-chevron-up');
+                icon.toggleClass('fa-chevron-down fa-chevron-up');
+            });
+            
+            // Lecture item click
+            $('.lecture-item').on('click', function() {
+                $('.lecture-item').removeClass('active');
+                $(this).addClass('active');
+            });
+            
+            // Save notes to localStorage
+            const courseId = /*[[${course.course_id}]]*/ '';
+            const notesKey = 'course_notes_' + courseId;
+            
+            // Load saved notes
+            const savedNotes = localStorage.getItem(notesKey);
+            if (savedNotes) {
+                $('.notes-section textarea').val(savedNotes);
+            }
+            
+            // Save notes on button click
+            $('.notes-section button').on('click', function() {
+                const notes = $('.notes-section textarea').val();
+                localStorage.setItem(notesKey, notes);
+                alert('Notes saved successfully!');
+            });
+        });
+    </script>
+</th:block>
+</body>
+</html>

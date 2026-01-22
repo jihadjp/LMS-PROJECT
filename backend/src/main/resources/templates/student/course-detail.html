@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head>
+    <title th:text="${course.course_name} + ' - Course Details'">Course Details</title>
+    <style>
+        .course-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 30px;
+            border-radius: 0 0 30px 30px;
+        }
+        .course-thumbnail-large {
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-height: 300px;
+            object-fit: cover;
+            width: 100%;
+        }
+        .price-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 20px;
+        }
+        .price-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .price-display.free {
+            color: #28a745;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+        .feature-item i {
+            width: 30px;
+            color: #667eea;
+        }
+        .instructor-card {
+            border: none;
+            border-radius: 15px;
+            background: #f8f9fa;
+        }
+        .section-title {
+            position: relative;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+        .rating-stars {
+            color: #ffc107;
+        }
+        .tab-content {
+            padding: 20px 0;
+        }
+        .nav-tabs .nav-link {
+            border: none;
+            color: #666;
+            padding: 15px 25px;
+        }
+        .nav-tabs .nav-link.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            background: transparent;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <!-- Course Hero Section -->
+    <div class="course-hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb bg-transparent p-0 mb-3">
+                            <li class="breadcrumb-item"><a href="/" class="text-white-50">Home</a></li>
+                            <li class="breadcrumb-item"><a th:href="@{/courses}" class="text-white-50">Courses</a></li>
+                            <li class="breadcrumb-item active text-white" th:text="${course.category}">Category</li>
+                        </ol>
+                    </nav>
+                    
+                    <span th:if="${course.category}" class="badge badge-light mb-3" th:text="${course.category}">Category</span>
+                    
+                    <h1 class="mb-3" th:text="${course.course_name}">Course Title</h1>
+                    
+                    <p class="lead mb-4" th:text="${#strings.abbreviate(course.description, 200)}">
+                        Course description...
+                    </p>
+                    
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rating-stars mr-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="mr-3">4.5 (128 ratings)</span>
+                        <span>
+                            <i class="fas fa-users mr-1"></i>
+                            <span th:text="${course.getEnrollmentCount()}">0</span> students
+                        </span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <span class="mr-3">
+                            <i class="fas fa-user-tie mr-1"></i>
+                            Created by 
+                            <strong th:text="${course.instructorUser != null ? course.instructorUser.name : course.instructor}">
+                                Instructor
+                            </strong>
+                        </span>
+                    </div>
+                    
+                    <div class="text-white-50 small">
+                        <span class="mr-3">
+                            <i class="fas fa-calendar mr-1"></i>
+                            Last updated: <span th:text="${#temporals.format(course.updatedAt != null ? course.updatedAt : course.createdAt, 'MMMM yyyy')}">Date</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <img th:if="${course.p_link != null and !course.p_link.isEmpty()}"
+                         th:src="${course.p_link}"
+                         class="course-thumbnail-large"
+                         alt="Course thumbnail">
+                    <div th:unless="${course.p_link != null and !course.p_link.isEmpty()}"
+                         class="course-thumbnail-large bg-white d-flex align-items-center justify-content-center"
+                         style="height: 250px;">
+                        <i class="fas fa-graduation-cap fa-5x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container">
+            
+            <!-- Success/Error Messages -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <i class="fas fa-check-circle mr-2"></i><span th:text="${success}">Success</span>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <i class="fas fa-exclamation-circle mr-2"></i><span th:text="${error}">Error</span>
+            </div>
+
+            <div class="row">
+                <!-- Main Content -->
+                <div class="col-lg-8">
+                    <!-- Course Tabs -->
+                    <ul class="nav nav-tabs" id="courseTabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#overview">Overview</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#curriculum">Curriculum</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#instructor">Instructor</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#reviews">Reviews</a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- Overview Tab -->
+                        <div class="tab-pane fade show active" id="overview">
+                            <h4 class="section-title">About This Course</h4>
+                            <p th:text="${course.description}" style="white-space: pre-line;">
+                                Course description will appear here...
+                            </p>
+                            
+                            <h4 class="section-title mt-5">What You'll Learn</h4>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Comprehensive understanding of the subject</li>
+                                        <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Hands-on practical experience</li>
+                                        <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Real-world project examples</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Industry best practices</li>
+                                        <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Lifetime access to materials</li>
+                                        <li class="mb-2"><i class="fas fa-check text-success mr-2"></i>Certificate upon completion</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <h4 class="section-title mt-5">Requirements</h4>
+                            <ul>
+                                <li>Basic computer knowledge</li>
+                                <li>Eagerness to learn</li>
+                                <li>Internet connection</li>
+                            </ul>
+                        </div>
+
+                        <!-- Curriculum Tab -->
+                        <div class="tab-pane fade" id="curriculum">
+                            <h4 class="section-title">Course Curriculum</h4>
+                            
+                            <div class="accordion" id="curriculumAccordion">
+                                <div class="card mb-2">
+                                    <div class="card-header bg-white" id="section1">
+                                        <h2 class="mb-0">
+                                            <button class="btn btn-link btn-block text-left" type="button" 
+                                                    data-toggle="collapse" data-target="#collapse1">
+                                                <i class="fas fa-folder mr-2"></i>
+                                                Section 1: Introduction
+                                                <span class="float-right text-muted small">3 lectures</span>
+                                            </button>
+                                        </h2>
+                                    </div>
+                                    <div id="collapse1" class="collapse show" data-parent="#curriculumAccordion">
+                                        <div class="card-body">
+                                            <ul class="list-unstyled mb-0">
+                                                <li class="py-2 border-bottom">
+                                                    <i class="fas fa-play-circle text-primary mr-2"></i>
+                                                    Welcome to the Course
+                                                    <span class="float-right text-muted small">5:00</span>
+                                                </li>
+                                                <li class="py-2 border-bottom">
+                                                    <i class="fas fa-play-circle text-primary mr-2"></i>
+                                                    Course Overview
+                                                    <span class="float-right text-muted small">10:00</span>
+                                                </li>
+                                                <li class="py-2">
+                                                    <i class="fas fa-file-alt text-info mr-2"></i>
+                                                    Resources & Downloads
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Enroll now to access the full curriculum!
+                            </div>
+                        </div>
+
+                        <!-- Instructor Tab -->
+                        <div class="tab-pane fade" id="instructor">
+                            <h4 class="section-title">Meet Your Instructor</h4>
+                            
+                            <div class="card instructor-card">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-auto">
+                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                                 style="width: 100px; height: 100px; font-size: 2.5rem;">
+                                                <span th:text="${course.instructorUser != null ? #strings.substring(course.instructorUser.name, 0, 1) : 'I'}">I</span>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <h4 th:text="${course.instructorUser != null ? course.instructorUser.name : course.instructor}">
+                                                Instructor Name
+                                            </h4>
+                                            <p class="text-muted mb-2">Professional Instructor</p>
+                                            <div class="d-flex">
+                                                <span class="mr-3">
+                                                    <i class="fas fa-star text-warning"></i> 4.8 Rating
+                                                </span>
+                                                <span class="mr-3">
+                                                    <i class="fas fa-users"></i> 1000+ Students
+                                                </span>
+                                                <span>
+                                                    <i class="fas fa-book"></i> 5 Courses
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <p class="mb-0">
+                                        An experienced instructor passionate about teaching and helping students achieve their learning goals.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reviews Tab -->
+                        <div class="tab-pane fade" id="reviews">
+                            <h4 class="section-title">Student Reviews</h4>
+                            
+                            <div class="row align-items-center mb-4">
+                                <div class="col-auto text-center">
+                                    <h1 class="mb-0">4.5</h1>
+                                    <div class="rating-stars">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                    </div>
+                                    <small class="text-muted">Course Rating</small>
+                                </div>
+                                <div class="col">
+                                    <div class="progress mb-2" style="height: 10px;">
+                                        <div class="progress-bar bg-warning" style="width: 70%"></div>
+                                    </div>
+                                    <div class="progress mb-2" style="height: 10px;">
+                                        <div class="progress-bar bg-warning" style="width: 20%"></div>
+                                    </div>
+                                    <div class="progress" style="height: 10px;">
+                                        <div class="progress-bar bg-warning" style="width: 10%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-comments fa-3x mb-3"></i>
+                                <p>Reviews will appear here after students complete the course.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar - Price Card -->
+                <div class="col-lg-4">
+                    <div class="card price-card">
+                        <!-- Video Preview -->
+                        <div th:if="${course.y_link != null and !course.y_link.isEmpty()}" class="card-img-top">
+                            <div class="embed-responsive embed-responsive-16by9">
+                                <iframe class="embed-responsive-item" 
+                                        th:src="${course.y_link.replace('watch?v=', 'embed/')}"
+                                        allowfullscreen></iframe>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <!-- Price -->
+                            <div class="text-center mb-4">
+                                <span th:if="${course.price == 0}" class="price-display free">FREE</span>
+                                <span th:unless="${course.price == 0}" class="price-display">
+                                    ৳<span th:text="${course.price}">0</span>
+                                </span>
+                            </div>
+                            
+                            <!-- Enrollment Button -->
+                            <div th:if="${isEnrolled}">
+                                <a th:href="@{/learn/{id}(id=${course.course_id})}" 
+                                   class="btn btn-success btn-lg btn-block mb-3">
+                                    <i class="fas fa-play mr-2"></i>Continue Learning
+                                </a>
+                                <p class="text-center text-success mb-0">
+                                    <i class="fas fa-check-circle mr-1"></i>You're enrolled!
+                                </p>
+                            </div>
+                            
+                            <div th:unless="${isEnrolled}" sec:authorize="isAuthenticated()">
+                                <form th:action="@{/courses/enroll/{id}(id=${course.course_id})}" method="post">
+                                    <button type="submit" class="btn btn-primary btn-lg btn-block mb-3">
+                                        <i class="fas fa-shopping-cart mr-2"></i>
+                                        <span th:text="${course.price == 0} ? 'Enroll Now - Free' : 'Enroll Now'">Enroll Now</span>
+                                    </button>
+                                </form>
+                            </div>
+                            
+                            <div th:unless="${isEnrolled}" sec:authorize="!isAuthenticated()">
+                                <a th:href="@{/login}" class="btn btn-primary btn-lg btn-block mb-3">
+                                    <i class="fas fa-sign-in-alt mr-2"></i>Login to Enroll
+                                </a>
+                            </div>
+                            
+                            <hr>
+                            
+                            <!-- Course Features -->
+                            <h6 class="font-weight-bold mb-3">This course includes:</h6>
+                            <div class="feature-item">
+                                <i class="fas fa-video"></i>
+                                <span>Video lectures</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Downloadable resources</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-infinity"></i>
+                                <span>Lifetime access</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-mobile-alt"></i>
+                                <span>Access on mobile</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-certificate"></i>
+                                <span>Certificate of completion</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</div>
+
+<th:block layout:fragment="script">
+    <script>
+        $(document).ready(function() {
+            // Initialize tabs
+            $('#courseTabs a').on('click', function (e) {
+                e.preventDefault();
+                $(this).tab('show');
+            });
+        });
+    </script>
+</th:block>
+</body>
+</html>

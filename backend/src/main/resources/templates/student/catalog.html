@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head>
+    <title>Course Catalog</title>
+    <style>
+        .course-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .course-thumbnail {
+            height: 180px;
+            object-fit: cover;
+            width: 100%;
+        }
+        .course-thumbnail-placeholder {
+            height: 180px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+        .price-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .price-badge.free {
+            background: #28a745;
+            color: white;
+        }
+        .price-badge.paid {
+            background: #ffc107;
+            color: #000;
+        }
+        .category-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            background: rgba(0,0,0,0.6);
+            color: white;
+        }
+        .instructor-info {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        .search-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 0;
+            margin-bottom: 30px;
+            border-radius: 0 0 20px 20px;
+        }
+        .filter-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        .category-filter {
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin: 3px;
+            display: inline-block;
+            background: #f8f9fa;
+            transition: all 0.2s;
+        }
+        .category-filter:hover, .category-filter.active {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <!-- Search Hero Section -->
+    <div class="search-section">
+        <div class="container">
+            <div class="text-center text-white mb-4">
+                <h1><i class="fas fa-graduation-cap mr-2"></i>Course Catalog</h1>
+                <p class="lead">Explore our wide range of courses and start learning today</p>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <form th:action="@{/courses}" method="get" class="mb-0">
+                        <div class="input-group input-group-lg">
+                            <input type="text" name="search" class="form-control" 
+                                   placeholder="Search courses..." 
+                                   th:value="${search}">
+                            <div class="input-group-append">
+                                <button class="btn btn-warning" type="submit">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+
+            <!-- Success/Error Messages -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <i class="fas fa-check-circle mr-2"></i><span th:text="${success}">Success</span>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <i class="fas fa-exclamation-circle mr-2"></i><span th:text="${error}">Error</span>
+            </div>
+
+            <div class="row">
+                <!-- Filters Sidebar -->
+                <div class="col-md-3">
+                    <div class="card filter-card sticky-top" style="top: 20px;">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-filter mr-2"></i>Filters
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Categories -->
+                            <h6 class="font-weight-bold mb-3">Categories</h6>
+                            <div class="mb-4">
+                                <a th:href="@{/courses}" 
+                                   th:class="${category == null} ? 'category-filter active' : 'category-filter'">
+                                    All
+                                </a>
+                                <a th:href="@{/courses(category='Web Development')}"
+                                   th:class="${category == 'Web Development'} ? 'category-filter active' : 'category-filter'">
+                                    Web Dev
+                                </a>
+                                <a th:href="@{/courses(category='Mobile Development')}"
+                                   th:class="${category == 'Mobile Development'} ? 'category-filter active' : 'category-filter'">
+                                    Mobile
+                                </a>
+                                <a th:href="@{/courses(category='Data Science')}"
+                                   th:class="${category == 'Data Science'} ? 'category-filter active' : 'category-filter'">
+                                    Data Science
+                                </a>
+                                <a th:href="@{/courses(category='Machine Learning')}"
+                                   th:class="${category == 'Machine Learning'} ? 'category-filter active' : 'category-filter'">
+                                    ML/AI
+                                </a>
+                                <a th:href="@{/courses(category='Cloud Computing')}"
+                                   th:class="${category == 'Cloud Computing'} ? 'category-filter active' : 'category-filter'">
+                                    Cloud
+                                </a>
+                                <a th:href="@{/courses(category='DevOps')}"
+                                   th:class="${category == 'DevOps'} ? 'category-filter active' : 'category-filter'">
+                                    DevOps
+                                </a>
+                            </div>
+
+                            <!-- Price Filter -->
+                            <h6 class="font-weight-bold mb-3">Price</h6>
+                            <div class="custom-control custom-radio mb-2">
+                                <input type="radio" id="priceAll" name="priceFilter" class="custom-control-input" checked>
+                                <label class="custom-control-label" for="priceAll">All Prices</label>
+                            </div>
+                            <div class="custom-control custom-radio mb-2">
+                                <input type="radio" id="priceFree" name="priceFilter" class="custom-control-input">
+                                <label class="custom-control-label" for="priceFree">Free Only</label>
+                            </div>
+                            <div class="custom-control custom-radio">
+                                <input type="radio" id="pricePaid" name="priceFilter" class="custom-control-input">
+                                <label class="custom-control-label" for="pricePaid">Paid Only</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Grid -->
+                <div class="col-md-9">
+                    <!-- Results Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h4 class="mb-0">
+                                <span th:if="${search != null and !search.isEmpty()}">
+                                    Search results for "<span th:text="${search}">keyword</span>"
+                                </span>
+                                <span th:if="${category != null and !category.isEmpty()}">
+                                    <span th:text="${category}">Category</span> Courses
+                                </span>
+                                <span th:if="${(search == null or search.isEmpty()) and (category == null or category.isEmpty())}">
+                                    All Courses
+                                </span>
+                            </h4>
+                            <small class="text-muted">
+                                <span th:text="${courses.size()}">0</span> courses found
+                            </small>
+                        </div>
+                        <div>
+                            <select class="form-control form-control-sm" id="sortBy">
+                                <option value="newest">Newest First</option>
+                                <option value="popular">Most Popular</option>
+                                <option value="price-low">Price: Low to High</option>
+                                <option value="price-high">Price: High to Low</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Course Cards -->
+                    <div class="row" th:if="${courses != null and !courses.isEmpty()}">
+                        <div class="col-md-4 mb-4" th:each="course : ${courses}">
+                            <div class="card course-card h-100">
+                                <div class="position-relative">
+                                    <!-- Thumbnail -->
+                                    <img th:if="${course.p_link != null and !course.p_link.isEmpty()}"
+                                         th:src="${course.p_link}" 
+                                         class="course-thumbnail"
+                                         alt="Course thumbnail">
+                                    <div th:unless="${course.p_link != null and !course.p_link.isEmpty()}"
+                                         class="course-thumbnail-placeholder">
+                                        <i class="fas fa-book"></i>
+                                    </div>
+                                    
+                                    <!-- Category Badge -->
+                                    <span th:if="${course.category != null}" 
+                                          class="category-badge"
+                                          th:text="${course.category}">Category</span>
+                                    
+                                    <!-- Price Badge -->
+                                    <span th:if="${course.price == 0}" class="price-badge free">FREE</span>
+                                    <span th:unless="${course.price == 0}" class="price-badge paid">
+                                        ৳<span th:text="${course.price}">0</span>
+                                    </span>
+                                </div>
+                                
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title" th:text="${course.course_name}">Course Name</h5>
+                                    <p class="card-text text-muted small flex-grow-1"
+                                       th:text="${#strings.abbreviate(course.description, 100)}">
+                                        Course description...
+                                    </p>
+                                    
+                                    <div class="instructor-info mb-3">
+                                        <i class="fas fa-user-tie mr-1"></i>
+                                        <span th:text="${course.instructorUser != null ? course.instructorUser.name : course.instructor}">
+                                            Instructor
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            <i class="fas fa-users mr-1"></i>
+                                            <span th:text="${course.getEnrollmentCount()}">0</span> enrolled
+                                        </small>
+                                        <a th:href="@{/courses/{id}(id=${course.course_id})}" 
+                                           class="btn btn-primary btn-sm">
+                                            View Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div th:if="${courses == null or courses.isEmpty()}" class="text-center py-5">
+                        <i class="fas fa-search fa-4x text-muted mb-3"></i>
+                        <h4>No courses found</h4>
+                        <p class="text-muted">
+                            Try adjusting your search or filters to find what you're looking for.
+                        </p>
+                        <a th:href="@{/courses}" class="btn btn-primary">
+                            <i class="fas fa-redo mr-2"></i>Clear Filters
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</div>
+
+<th:block layout:fragment="script">
+    <script>
+        $(document).ready(function() {
+            // Price filter handling (client-side for now)
+            $('input[name="priceFilter"]').on('change', function() {
+                const filterValue = $(this).attr('id');
+                // You can implement AJAX filtering here
+            });
+        });
+    </script>
+</th:block>
+</body>
+</html>

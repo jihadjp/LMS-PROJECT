@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Create New Course</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">
+                        <i class="fas fa-plus-circle mr-2"></i>Create New Course
+                    </h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a th:href="@{/instructor/dashboard}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a th:href="@{/instructor/courses}">Courses</a></li>
+                        <li class="breadcrumb-item active">Create</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+
+            <!-- Success/Error Messages -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <i class="fas fa-check-circle mr-2"></i><span th:text="${success}">Success</span>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <i class="fas fa-exclamation-circle mr-2"></i><span th:text="${error}">Error</span>
+            </div>
+
+            <form th:action="@{/instructor/courses/create}" method="post" id="courseForm">
+
+                <div class="row">
+                    <!-- Main Form -->
+                    <div class="col-md-8">
+                        <!-- Basic Information -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-info-circle mr-2"></i>Basic Information
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label>Course Title <span class="text-danger">*</span></label>
+                                    <input type="text" name="course_name" class="form-control"
+                                           placeholder="e.g., Complete Web Development Bootcamp" required>
+                                    <small class="form-text text-muted">
+                                        Choose a clear, descriptive title that tells students what they'll learn
+                                    </small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Course Description <span class="text-danger">*</span></label>
+                                    <textarea name="description" class="form-control" rows="6"
+                                              placeholder="Describe what students will learn, prerequisites, and course outcomes..."
+                                              required></textarea>
+                                    <small class="form-text text-muted">
+                                        Minimum 100 characters. Be detailed and specific.
+                                    </small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    <select name="category" class="form-control">
+                                        <option value="">-- Select Category --</option>
+                                        <option value="Web Development">Web Development</option>
+                                        <option value="Mobile Development">Mobile Development</option>
+                                        <option value="Data Science">Data Science</option>
+                                        <option value="Machine Learning">Machine Learning</option>
+                                        <option value="Cloud Computing">Cloud Computing</option>
+                                        <option value="DevOps">DevOps</option>
+                                        <option value="Cybersecurity">Cybersecurity</option>
+                                        <option value="UI/UX Design">UI/UX Design</option>
+                                        <option value="Business">Business</option>
+                                        <option value="Marketing">Marketing</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Price (৳) <span class="text-danger">*</span></label>
+                                            <input type="number" name="price" class="form-control"
+                                                   min="0" step="1" placeholder="0" required value="0">
+                                            <small class="form-text text-muted">
+                                                Set to 0 for free courses
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Thumbnail Image URL</label>
+                                    <input type="url" name="p_link" class="form-control"
+                                           placeholder="https://example.com/image.jpg">
+                                    <small class="form-text text-muted">
+                                        Direct URL to course thumbnail/preview image
+                                    </small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Course Video URL (YouTube)</label>
+                                    <input type="url" name="y_link" class="form-control"
+                                           placeholder="https://youtube.com/...">
+                                    <small class="form-text text-muted">
+                                        YouTube or other video platform link for course content
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Sidebar -->
+                    <div class="col-md-4">
+                        <!-- Publishing Options -->
+                        <div class="card card-primary">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-cog mr-2"></i>Publishing Options
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <input type="hidden" name="action" id="formAction" value="draft">
+                                
+                                <button type="submit" class="btn btn-secondary btn-block mb-2"
+                                        onclick="document.getElementById('formAction').value='draft'">
+                                    <i class="fas fa-save mr-2"></i>Save as Draft
+                                </button>
+                                
+                                <button type="submit" class="btn btn-primary btn-block"
+                                        onclick="document.getElementById('formAction').value='submit'">
+                                    <i class="fas fa-paper-plane mr-2"></i>Submit for Approval
+                                </button>
+                                
+                                <hr>
+                                
+                                <a th:href="@{/instructor/courses}" class="btn btn-outline-secondary btn-block">
+                                    <i class="fas fa-times mr-2"></i>Cancel
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Guidelines -->
+                        <div class="card bg-light">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-lightbulb mr-2"></i>Course Creation Tips
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <ul class="pl-3 mb-0">
+                                    <li class="mb-2">Use clear, descriptive titles</li>
+                                    <li class="mb-2">Provide detailed descriptions</li>
+                                    <li class="mb-2">Set appropriate pricing</li>
+                                    <li class="mb-2">Add thumbnail for better visibility</li>
+                                    <li class="mb-2">Include YouTube video link</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Workflow Info -->
+                        <div class="alert alert-info">
+                            <strong><i class="fas fa-info-circle mr-2"></i>Approval Workflow:</strong>
+                            <ol class="pl-3 mb-0 mt-2 small">
+                                <li>Save as Draft (edit anytime)</li>
+                                <li>Submit for Approval</li>
+                                <li>Admin reviews your course</li>
+                                <li>Course gets Published or Rejected</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+
+        </div>
+    </section>
+
+</div>
+
+<th:block layout:fragment="script">
+    <script>
+        $(document).ready(function() {
+            // Form validation
+            $('#courseForm').on('submit', function(e) {
+                const courseName = $('input[name="course_name"]').val().trim();
+                const description = $('textarea[name="description"]').val().trim();
+                
+                if (courseName.length < 5) {
+                    alert('Course title must be at least 5 characters.');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                if (description.length < 50) {
+                    alert('Course description must be at least 50 characters.');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                return true;
+            });
+        });
+    </script>
+</th:block>
+</body>
+</html>

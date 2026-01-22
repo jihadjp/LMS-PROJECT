@@ -1,0 +1,94 @@
+package com.starter_squad.lms.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import com.starter_squad.lms.dto.ProgressRequest;
+import com.starter_squad.lms.entity.Course;
+import com.starter_squad.lms.entity.Progress;
+import com.starter_squad.lms.entity.User;
+import com.starter_squad.lms.repository.CourseRepository;
+import com.starter_squad.lms.repository.ProgressRepository;
+import com.starter_squad.lms.repository.UserRepository;
+
+import java.util.UUID;
+
+@RequiredArgsConstructor
+@Service
+public class ProgressService {
+
+    private final ProgressRepository progressRepository;
+
+    private final UserRepository userRepository;
+
+    private final CourseRepository courseRepository;
+
+    public ResponseEntity<String> updateProgress(ProgressRequest request) {
+        UUID userId = request.getUserId();
+        UUID courseId = request.getCourseId();
+        float playedTime = request.getPlayedTime();
+        float duration = request.getDuration();
+
+        User user = userRepository.findById(userId).orElse(null);
+        Course course = courseRepository.findById(courseId).orElse(null);
+
+        if (user != null && course != null) {
+            Progress progress = progressRepository.findByUserAndCourse(user, course);
+            if (progress != null && (progress.getPlayedTime() == 0 || progress.getPlayedTime()<= playedTime)) {
+                progress.setPlayedTime(playedTime);
+                progress.setDuration(duration);
+                progressRepository.save(progress);
+                return ResponseEntity.ok("success");
+            } else {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Invalid playedTime");
+            }
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User or course not found");
+    }
+
+    public float getProgress(UUID userId, UUID courseId) {
+        User user = userRepository.findById(userId).orElse(null);
+        Course course = courseRepository.findById(courseId).orElse(null);
+
+        if (user != null && course != null) {
+            Progress progress = progressRepository.findByUserAndCourse(user, course);
+
+            // এখানে চেক করতে হবে রেকর্ডটি আছে কি না
+            if (progress != null) {
+                return progress.getPlayedTime();
+            }
+        }
+        // ইউজার বা কোর্স না থাকলে অথবা প্রগ্রেস রেকর্ড না থাকলে ০ রিটার্ন করবে
+        return 0;
+    }
+
+	public ResponseEntity<String> updateDuration(ProgressRequest request) {
+        UUID userId = request.getUserId();
+        UUID courseId = request.getCourseId();
+        float newDuration = request.getDuration();
+
+        User user = userRepository.findById(userId).orElse(null);
+        Course course = courseRepository.findById(courseId).orElse(null);
+
+        if (user != null && course != null) {
+            Progress progress = progressRepository.findByUserAndCourse(user, course);
+
+            if (progress != null) {
+                progress.setDuration(newDuration);
+                progressRepository.save(progress);
+
+                return ResponseEntity.ok("Duration updated successfully");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Progress not found for the given user and course");
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User or course not found");
+        }
+    }
+
+    
+}
+

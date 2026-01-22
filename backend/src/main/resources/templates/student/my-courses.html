@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head>
+    <title>My Courses</title>
+    <style>
+        .course-card {
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .course-thumbnail {
+            height: 160px;
+            object-fit: cover;
+            width: 100%;
+        }
+        .course-thumbnail-placeholder {
+            height: 160px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+        }
+        .progress-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            background: rgba(0,0,0,0.7);
+            color: white;
+        }
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+        .filter-tabs .nav-link {
+            border-radius: 20px;
+            padding: 8px 20px;
+            margin-right: 10px;
+            color: #666;
+        }
+        .filter-tabs .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .completion-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 0 auto;
+        }
+        .stat-mini {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">
+                        <i class="fas fa-book-open mr-2"></i>My Courses
+                    </h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                        <li class="breadcrumb-item active">My Courses</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+
+            <!-- Success/Error Messages -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <i class="fas fa-check-circle mr-2"></i><span th:text="${success}">Success</span>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <i class="fas fa-exclamation-circle mr-2"></i><span th:text="${error}">Error</span>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="stat-mini">
+                        <h3 class="text-primary mb-0" th:text="${totalCourses}">0</h3>
+                        <small class="text-muted">Total Enrolled</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-mini">
+                        <h3 class="text-warning mb-0" th:text="${inProgressCount}">0</h3>
+                        <small class="text-muted">In Progress</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-mini">
+                        <h3 class="text-success mb-0" th:text="${completedCount}">0</h3>
+                        <small class="text-muted">Completed</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-mini">
+                        <h3 class="text-info mb-0" th:text="${certificateCount}">0</h3>
+                        <small class="text-muted">Certificates</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <ul class="nav filter-tabs mb-4">
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${filter == null or filter == 'all'} ? 'active' : ''"
+                       th:href="@{/my-courses}">
+                        <i class="fas fa-th-large mr-2"></i>All
+                        <span class="badge badge-secondary ml-1" th:text="${totalCourses}">0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${filter == 'in-progress'} ? 'active' : ''"
+                       th:href="@{/my-courses(filter='in-progress')}">
+                        <i class="fas fa-spinner mr-2"></i>In Progress
+                        <span class="badge badge-warning ml-1" th:text="${inProgressCount}">0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${filter == 'completed'} ? 'active' : ''"
+                       th:href="@{/my-courses(filter='completed')}">
+                        <i class="fas fa-check-circle mr-2"></i>Completed
+                        <span class="badge badge-success ml-1" th:text="${completedCount}">0</span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Course Grid -->
+            <div class="row" th:if="${enrolledCourses != null and !enrolledCourses.isEmpty()}">
+                <div class="col-lg-4 col-md-6 mb-4" th:each="learning : ${enrolledCourses}">
+                    <div class="card course-card h-100">
+                        <div class="position-relative">
+                            <!-- Thumbnail -->
+                            <img th:if="${learning.course.p_link != null and !learning.course.p_link.isEmpty()}"
+                                 th:src="${learning.course.p_link}" 
+                                 class="course-thumbnail"
+                                 alt="Course thumbnail">
+                            <div th:unless="${learning.course.p_link != null and !learning.course.p_link.isEmpty()}"
+                                 class="course-thumbnail-placeholder">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            
+                            <!-- Status Badge -->
+                            <span class="status-badge">
+                                <span th:if="${learning.completed}" class="badge badge-success">
+                                    <i class="fas fa-check mr-1"></i>Completed
+                                </span>
+                                <span th:unless="${learning.completed}" class="badge badge-warning">
+                                    <i class="fas fa-clock mr-1"></i>In Progress
+                                </span>
+                            </span>
+                            
+                            <!-- Progress Badge -->
+                            <span class="progress-badge">
+                                <span th:text="${learning.progress != null ? learning.progress.percentage : 0}">0</span>%
+                            </span>
+                        </div>
+                        
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title" th:text="${learning.course.course_name}">Course Name</h5>
+                            
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-user-tie mr-1"></i>
+                                    <span th:text="${learning.course.instructorUser != null ? learning.course.instructorUser.name : learning.course.instructor}">
+                                        Instructor
+                                    </span>
+                                </small>
+                            </div>
+                            
+                            <!-- Progress Bar -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small>Progress</small>
+                                    <small th:text="${learning.progress != null ? learning.progress.percentage : 0} + '%'">0%</small>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar" 
+                                         th:classappend="${learning.completed} ? 'bg-success' : 'bg-primary'"
+                                         role="progressbar"
+                                         th:style="'width: ' + ${learning.progress != null ? learning.progress.percentage : 0} + '%'">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Enrollment Info -->
+                            <div class="mb-3 text-muted small">
+                                <i class="fas fa-calendar mr-1"></i>
+                                Enrolled: <span th:text="${#temporals.format(learning.enrollmentDate, 'MMM dd, yyyy')}">Date</span>
+                            </div>
+                            
+                            <div class="mt-auto">
+                                <div class="btn-group btn-block">
+                                    <a th:href="@{/learn/{id}(id=${learning.course.course_id})}" 
+                                       class="btn btn-primary">
+                                        <i class="fas fa-play mr-1"></i>
+                                        <span th:text="${learning.completed} ? 'Review' : 'Continue'">Continue</span>
+                                    </a>
+                                    <a th:href="@{/courses/{id}(id=${learning.course.course_id})}" 
+                                       class="btn btn-outline-secondary">
+                                        <i class="fas fa-info-circle"></i>
+                                    </a>
+                                </div>
+                                
+                                <!-- Certificate Button (if completed) -->
+                                <a th:if="${learning.completed}"
+                                   th:href="@{/certificate/{id}(id=${learning.learning_id})}"
+                                   class="btn btn-success btn-block mt-2">
+                                    <i class="fas fa-certificate mr-2"></i>View Certificate
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${enrolledCourses == null or enrolledCourses.isEmpty()}" class="text-center py-5">
+                <div class="card">
+                    <div class="card-body py-5">
+                        <i class="fas fa-book-reader fa-4x text-muted mb-4"></i>
+                        <h4>No courses found</h4>
+                        <p class="text-muted mb-4">
+                            <span th:if="${filter == 'completed'}">You haven't completed any courses yet. Keep learning!</span>
+                            <span th:if="${filter == 'in-progress'}">You don't have any courses in progress.</span>
+                            <span th:if="${filter == null or filter == 'all'}">Start your learning journey by enrolling in a course.</span>
+                        </p>
+                        <a th:href="@{/courses}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-search mr-2"></i>Browse Courses
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</div>
+
+<th:block layout:fragment="script">
+    <script>
+        $(document).ready(function() {
+            // Animate course cards on load
+            $('.course-card').each(function(index) {
+                $(this).css('opacity', 0).delay(50 * index).animate({opacity: 1}, 300);
+            });
+        });
+    </script>
+</th:block>
+</body>
+</html>

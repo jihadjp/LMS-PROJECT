@@ -6,6 +6,7 @@ import { authService } from "../../api/auth.service";
 import { Mail, Lock, LogIn } from "lucide-react";
 import { InputField } from "../../Components/common/InputFeild";
 import { message } from "antd";
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -58,12 +59,12 @@ function Login() {
         if (userRole === "ROLE_ADMIN") {
           message.success("Welcome Admin! Redirecting to Management Panel...");
           // থাইমলিফ অ্যাডমিন ড্যাশবোর্ডে পাঠিয়ে দিবে
-          window.location.href = "http://localhost:8080/admin/dashboard"; 
+          window.location.href = `${BACKEND_URL}/admin/dashboard`; 
           
         } else if (userRole === "ROLE_INSTRUCTOR") {
           message.success("Welcome Instructor! Redirecting to Teacher Portal...");
           // থাইমলিফ ইন্সট্রাক্টর ড্যাশবোর্ডে পাঠিয়ে দিবে
-          window.location.href = "http://localhost:8080/instructor/dashboard";
+          window.location.href = `${BACKEND_URL}/instructor/dashboard`;
 
         } else {
           // সাধারণ স্টুডেন্ট রিঅ্যাক্ট অ্যাপেই থাকবে

@@ -17,19 +17,23 @@ public class ViewController {
     private String frontendUrl;
 
     @GetMapping("/")
-    @ResponseBody  // ← এই annotation যোগ করুন
-    public ResponseEntity<String> home(@AuthenticationPrincipal UserPrincipal principal) {
+    public String home(@AuthenticationPrincipal UserPrincipal principal) {
+        String cleanUrl = (frontendUrl.endsWith("/")) ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
+
         if (principal == null) {
-            return ResponseEntity.ok("LMS Backend is running");  // Render এর health check pass হবে
+            // Render health check HEAD request এর জন্য কাজ করবে,
+            // browser GET এর জন্য frontend এ পাঠাবে
+            return "redirect:" + cleanUrl;  // /login নয়, শুধু frontend root এ পাঠাও
         }
 
         String role = principal.getAuthorities().iterator().next().getAuthority();
-        String cleanUrl = (frontendUrl.endsWith("/")) ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
-
-        if (role.equals("ROLE_ADMIN") || role.equals("ROLE_INSTRUCTOR")) {
-            return ResponseEntity.ok("redirect:/admin/dashboard");
+        if (role.equals("ROLE_ADMIN")) {
+            return "redirect:/admin/dashboard";
+        } else if (role.equals("ROLE_INSTRUCTOR")) {
+            return "redirect:/instructor/dashboard";
         }
-        return ResponseEntity.ok("redirect:" + cleanUrl + "/courses");
+
+        return "redirect:" + cleanUrl + "/courses";
     }
 
     // ==========================================

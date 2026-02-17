@@ -29,9 +29,10 @@ server:
       store-dir: sessions
 
 frontend:
-  url: http://localhost:3000
+  url: ${FRONTEND_URL:http://localhost:3000}
 app:
-  frontend-url: http://localhost:3000
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+
   jwtSecret: ${JWT_SECRET:mySecretKey1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ}
   jwtExpirationMs: ${JWT_EXPIRATION:86400000}
   default-admin:

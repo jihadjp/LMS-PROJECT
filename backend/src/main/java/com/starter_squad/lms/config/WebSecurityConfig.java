@@ -81,7 +81,6 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        // এখানে অবশ্যই "/error" যুক্ত করতে হবে
                         .requestMatchers("/", "/login", "/register", "/error", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/instructor/**").hasAnyRole("INSTRUCTOR", "ADMIN")
@@ -89,12 +88,14 @@ public class WebSecurityConfig {
                 )
                 .exceptionHandling(eh -> eh
                         .authenticationEntryPoint((request, response, authException) -> {
-                            // সেশন না থাকলে রিডাইরেক্ট
-                            response.sendRedirect(frontendUrl + "/login?session_expired=true");
+                            // যদি ইউজার লগইন না থাকে, তবে তাকে রিঅ্যাক্ট অ্যাপের লগইন পেজে পাঠিয়ে দিবে
+                            response.sendRedirect(frontendUrl + "/login");
                         })
                 )
                 .formLogin(form -> form
-                        .loginPage("/login")
+                        // এখানে রিঅ্যাক্ট অ্যাপের ফুল ইউআরএল ব্যবহার করুন
+                        .loginPage(frontendUrl + "/login")
+                        .loginProcessingUrl("/api/auth/login") // এটি আপনার AuthController এর এন্ডপয়েন্ট
                         .defaultSuccessUrl("/admin/dashboard", true)
                         .permitAll()
                 )

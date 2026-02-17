@@ -63,7 +63,7 @@ public class WebSecurityConfig {
         http.securityMatcher("/api/**")
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // ✅
                 .exceptionHandling(eh -> eh.authenticationEntryPoint(unauthorizedHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
@@ -80,14 +80,12 @@ public class WebSecurityConfig {
     @Bean
     @Order(2)
     public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
-        // নিশ্চিত করুন frontendUrl এর শেষে যেন বাড়তি স্ল্যাশ না থাকে
         String cleanUrl = (frontendUrl.endsWith("/")) ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
 
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        // /login এবং /error কে অবশ্যই পারমিট অল করতে হবে রিডাইরেক্ট লুপ এড়াতে
                         .requestMatchers("/", "/login", "/register", "/error", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/instructor/**").hasAnyRole("INSTRUCTOR", "ADMIN")
@@ -95,17 +93,16 @@ public class WebSecurityConfig {
                 )
                 .exceptionHandling(eh -> eh
                         .authenticationEntryPoint((request, response, authException) -> {
-                            // সেশন শেষ হলে ফ্রন্টএন্ডে রিডাইরেক্ট
                             response.sendRedirect(cleanUrl + "/login?session_expired=true");
                         })
                 )
                 .formLogin(form -> form
-                        .loginPage(cleanUrl + "/login")
+                        .loginPage("/login")           // ✅ relative path
                         .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl(cleanUrl + "/login?logout=true")
+                        .logoutSuccessUrl("/login?logout=true")  // ✅ relative path
                         .permitAll()
                 );
 

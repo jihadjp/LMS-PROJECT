@@ -3,6 +3,7 @@ package com.starter_squad.lms.controller;
 import com.starter_squad.lms.entity.User;
 import com.starter_squad.lms.security.UserPrincipal;
 import com.starter_squad.lms.service.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,18 +14,19 @@ public class ViewController {
 
     private final UserService userService;
 
+    // ১. application.yml থেকে ফ্রন্টএন্ড ইউআরএল নিয়ে আসা
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
+
     public ViewController(UserService userService) {
         this.userService = userService;
     }
 
-    // ==========================================
-    // HOME/ROOT ROUTE
-    // ==========================================
-
     @GetMapping("/")
     public String home(@AuthenticationPrincipal UserPrincipal principal) {
         if (principal == null) {
-            return "redirect:/login";
+            // সেশন না থাকলে রিঅ্যাক্ট লগইন পেজে পাঠিয়ে দিবে
+            return "redirect:" + frontendUrl + "/login";
         }
 
         String role = principal.getAuthorities().iterator().next().getAuthority();
@@ -33,45 +35,25 @@ public class ViewController {
             return "redirect:/admin/dashboard";
         } else if (role.equals("ROLE_INSTRUCTOR")) {
             return "redirect:/instructor/dashboard";
-        } else if (role.equals("ROLE_USER") || role.equals("ROLE_STUDENT")) {
-            return "redirect:/dashboard";
+        } else {
+            // স্টুডেন্টদের রিঅ্যাক্ট কোর্সেস পেজে পাঠিয়ে দিবে
+            return "redirect:" + frontendUrl + "/courses";
         }
-
-        return "redirect:/login";
     }
 
-    // ==========================================
-    // AUTHENTICATION ROUTES
-    // ==========================================
-
     @GetMapping("/login")
-    public String loginPage(@RequestParam(required = false) String error,
-                            @RequestParam(required = false) String success,
-                            Model model) {
-        if (error != null) {
-            model.addAttribute("error", "Invalid username or password");
-        }
-        if (success != null) {
-            model.addAttribute("success", "Registration successful! Please login.");
-        }
-        return "auth/login";
+    public String loginPage() {
+        // থাইমলিফ ফাইল না খুঁজে সরাসরি রিঅ্যাক্ট ইউআরএল-এ পাঠিয়ে দিবে
+        return "redirect:" + frontendUrl + "/login";
     }
 
     @GetMapping("/register")
     public String registerPage() {
-        return "auth/register";
+        // রিঅ্যাক্ট রেজিস্ট্রেশন পেজে পাঠিয়ে দিবে
+        return "redirect:" + frontendUrl + "/register";
     }
 
-    @PostMapping("/register")
-    public String handleRegistration(@ModelAttribute User userDto, Model model) {
-        try {
-            userService.createUser(userDto);
-            return "redirect:/login?success";
-        } catch (Exception e) {
-            model.addAttribute("error", "Registration failed: " + e.getMessage());
-            return "auth/register";
-        }
-    }
+    // access-denied এবং error মেথডগুলো যদি থাইমলিফ ফাইল থাকে তবেই রাখুন, নাহলে সেগুলোও রিডাইরেক্ট করুন।
 
     // ==========================================
     // ERROR HANDLERS

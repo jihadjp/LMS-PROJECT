@@ -88,15 +88,12 @@ public class WebSecurityConfig {
                 )
                 .exceptionHandling(eh -> eh
                         .authenticationEntryPoint((request, response, authException) -> {
-                            // যদি ইউজার লগইন না থাকে, তবে তাকে রিঅ্যাক্ট অ্যাপের লগইন পেজে পাঠিয়ে দিবে
+                            // এরর না দেখিয়ে সরাসরি রিঅ্যাক্ট লগইন পেজে পাঠিয়ে দিবে
                             response.sendRedirect(frontendUrl + "/login");
                         })
                 )
                 .formLogin(form -> form
-                        // এখানে রিঅ্যাক্ট অ্যাপের ফুল ইউআরএল ব্যবহার করুন
-                        .loginPage(frontendUrl + "/login")
-                        .loginProcessingUrl("/api/auth/login") // এটি আপনার AuthController এর এন্ডপয়েন্ট
-                        .defaultSuccessUrl("/admin/dashboard", true)
+                        .loginPage(frontendUrl + "/login") // লোকাল ফাইলের বদলে রিঅ্যাক্ট ইউআরএল
                         .permitAll()
                 )
                 .logout(logout -> logout

@@ -1,4 +1,5 @@
 package com.starter_squad.lms.entity;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -10,7 +11,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Data
@@ -19,9 +19,8 @@ import org.hibernate.annotations.GenericGenerator;
 public class Course {
 
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "course_id", updatable = false, nullable = false, columnDefinition = "BINARY(16)")
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "course_id", updatable = false, nullable = false)
     private UUID course_id;
 
     @JsonProperty("course_name")
@@ -74,7 +73,7 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Feedback> feedbacks;
-    
+
     @OneToMany(mappedBy = "course")
     @JsonIgnore
     private List<Questions> questions;

@@ -3,7 +3,6 @@ package com.starter_squad.lms.entity;
 import com.starter_squad.lms.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -21,10 +20,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class User {
+
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "BINARY(16)")
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
     @Column(nullable = false)
@@ -52,8 +51,7 @@ public class User {
     private String linkedin_url;
     private String github_url;
 
-    @Lob
-    @Column(columnDefinition = "LONGBLOB")
+    @Column(columnDefinition = "bytea")
     private byte[] profileImage;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)

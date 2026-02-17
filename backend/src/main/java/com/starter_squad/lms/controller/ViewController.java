@@ -12,48 +12,33 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 public class ViewController {
 
-    private final UserService userService;
-
-    // ১. application.yml থেকে ফ্রন্টএন্ড ইউআরএল নিয়ে আসা
     @Value("${app.frontend-url}")
     private String frontendUrl;
 
-    public ViewController(UserService userService) {
-        this.userService = userService;
-    }
-
     @GetMapping("/")
     public String home(@AuthenticationPrincipal UserPrincipal principal) {
+        String cleanUrl = (frontendUrl.endsWith("/")) ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
+
         if (principal == null) {
-            // সেশন না থাকলে রিঅ্যাক্ট লগইন পেজে পাঠিয়ে দিবে
-            return "redirect:" + frontendUrl + "/login";
+            return "redirect:" + cleanUrl + "/login";
         }
 
         String role = principal.getAuthorities().iterator().next().getAuthority();
-
-        if (role.equals("ROLE_ADMIN") || role.equals("ROLE_SUPER_ADMIN")) {
+        if (role.equals("ROLE_ADMIN")) {
             return "redirect:/admin/dashboard";
         } else if (role.equals("ROLE_INSTRUCTOR")) {
             return "redirect:/instructor/dashboard";
-        } else {
-            // স্টুডেন্টদের রিঅ্যাক্ট কোর্সেস পেজে পাঠিয়ে দিবে
-            return "redirect:" + frontendUrl + "/courses";
         }
+
+        return "redirect:" + cleanUrl + "/courses";
     }
 
+    // ব্যাকএন্ডে এই মেথডগুলোর দরকার নেই, সিকিউরিটি কনফিগারেশন এগুলো হ্যান্ডেল করবে
     @GetMapping("/login")
     public String loginPage() {
-        // নিশ্চিত করুন frontendUrl এর শেষে স্ল্যাশ নেই, তাই সরাসরি /login যোগ করছি
-        return "redirect:" + frontendUrl + "/login";
+        String cleanUrl = (frontendUrl.endsWith("/")) ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
+        return "redirect:" + cleanUrl + "/login";
     }
-
-    @GetMapping("/register")
-    public String registerPage() {
-        // রিঅ্যাক্ট রেজিস্ট্রেশন পেজে পাঠিয়ে দিবে
-        return "redirect:" + frontendUrl + "/register";
-    }
-
-    // access-denied এবং error মেথডগুলো যদি থাইমলিফ ফাইল থাকে তবেই রাখুন, নাহলে সেগুলোও রিডাইরেক্ট করুন।
 
     // ==========================================
     // ERROR HANDLERS

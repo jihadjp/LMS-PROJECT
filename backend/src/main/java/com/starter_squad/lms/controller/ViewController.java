@@ -4,6 +4,7 @@ import com.starter_squad.lms.entity.User;
 import com.starter_squad.lms.security.UserPrincipal;
 import com.starter_squad.lms.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,28 +17,19 @@ public class ViewController {
     private String frontendUrl;
 
     @GetMapping("/")
-    public String home(@AuthenticationPrincipal UserPrincipal principal) {
-        String cleanUrl = (frontendUrl.endsWith("/")) ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
-
+    @ResponseBody  // ← এই annotation যোগ করুন
+    public ResponseEntity<String> home(@AuthenticationPrincipal UserPrincipal principal) {
         if (principal == null) {
-            return "redirect:" + cleanUrl + "/login";
+            return ResponseEntity.ok("LMS Backend is running");  // Render এর health check pass হবে
         }
 
         String role = principal.getAuthorities().iterator().next().getAuthority();
-        if (role.equals("ROLE_ADMIN")) {
-            return "redirect:/admin/dashboard";
-        } else if (role.equals("ROLE_INSTRUCTOR")) {
-            return "redirect:/instructor/dashboard";
-        }
-
-        return "redirect:" + cleanUrl + "/courses";
-    }
-
-    // ব্যাকএন্ডে এই মেথডগুলোর দরকার নেই, সিকিউরিটি কনফিগারেশন এগুলো হ্যান্ডেল করবে
-    @GetMapping("/login")
-    public String loginPage() {
         String cleanUrl = (frontendUrl.endsWith("/")) ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
-        return "redirect:" + cleanUrl + "/login";
+
+        if (role.equals("ROLE_ADMIN") || role.equals("ROLE_INSTRUCTOR")) {
+            return ResponseEntity.ok("redirect:/admin/dashboard");
+        }
+        return ResponseEntity.ok("redirect:" + cleanUrl + "/courses");
     }
 
     // ==========================================

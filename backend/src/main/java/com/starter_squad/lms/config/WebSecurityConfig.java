@@ -79,9 +79,10 @@ public class WebSecurityConfig {
     public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // এখানেও CORS যুক্ত করা হলো
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/register", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
+                        // এখানে অবশ্যই "/error" যুক্ত করতে হবে
+                        .requestMatchers("/", "/login", "/register", "/error", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/instructor/**").hasAnyRole("INSTRUCTOR", "ADMIN")
                         .anyRequest().permitAll()

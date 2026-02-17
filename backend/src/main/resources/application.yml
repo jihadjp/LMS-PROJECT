@@ -12,9 +12,14 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     generate-ddl: true
-    show-sql: false
+    show-sql: true # প্রোডাকশনে এরর ট্র্যাকিং এর জন্য সাময়িকভাবে true রাখতে পারেন
     hibernate:
       ddl-auto: update
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true # PostgreSQL এ LOB হ্যান্ডলিং এর জন্য এটি জরুরি
 
   thymeleaf:
     cache: false

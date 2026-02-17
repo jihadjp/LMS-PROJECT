@@ -86,23 +86,25 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/register", "/error", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers(
+                                "/", "/error",
+                                "/static/**", "/css/**", "/js/**", "/images/**",
+                                "/actuator/**"
+                        ).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/instructor/**").hasAnyRole("INSTRUCTOR", "ADMIN")
-                        .anyRequest().permitAll()
+                        .anyRequest().permitAll()  // বাকি সব permit
                 )
                 .exceptionHandling(eh -> eh
                         .authenticationEntryPoint((request, response, authException) -> {
+                            // Authenticated না হলে React frontend এ পাঠাও
                             response.sendRedirect(cleanUrl + "/login?session_expired=true");
                         })
                 )
-                .formLogin(form -> form
-                        .loginPage("/login")           // ✅ relative path
-                        .permitAll()
-                )
+                // ❌ formLogin সরিয়ে দিন — backend এ /login page নেই
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout=true")  // ✅ relative path
+                        .logoutSuccessUrl(cleanUrl + "/login?logout=true")
                         .permitAll()
                 );
 

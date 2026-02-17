@@ -13,6 +13,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     generate-ddl: true
     show-sql: true # প্রোডাকশনে এরর ট্র্যাকিং এর জন্য সাময়িকভাবে true রাখতে পারেন
+    open-in-view: false
     hibernate:
       ddl-auto: update
     properties:

@@ -43,7 +43,7 @@ public class ViewController {
 
     @GetMapping("/login")
     public String loginPage() {
-        // থাইমলিফ ফাইল না খুঁজে সরাসরি রিঅ্যাক্ট ইউআরএল-এ পাঠিয়ে দিবে
+        // নিশ্চিত করুন frontendUrl এর শেষে স্ল্যাশ নেই, তাই সরাসরি /login যোগ করছি
         return "redirect:" + frontendUrl + "/login";
     }
 

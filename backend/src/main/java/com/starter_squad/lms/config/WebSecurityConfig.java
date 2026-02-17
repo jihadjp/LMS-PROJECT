@@ -18,6 +18,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -36,6 +38,14 @@ public class WebSecurityConfig {
     @Value("${app.frontend-url}")
     private String frontendUrl;
 
+    // ১. URL থেকে অতিরিক্ত স্ল্যাশ (//) এর সমস্যা এড়াতে ক্লিন ইউআরএল মেথড
+    private String getCleanFrontendUrl() {
+        if (frontendUrl != null && frontendUrl.endsWith("/")) {
+            return frontendUrl.substring(0, frontendUrl.length() - 1);
+        }
+        return frontendUrl;
+    }
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
@@ -46,6 +56,17 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    // ২. FireWall কনফিগারেশন: ডাবল স্ল্যাশ (//) অনুমোদন করার জন্য
+    @Bean
+    public HttpFirewall allowUrlEncodedDoubleSlashHttpFirewall() {
+        StrictHttpFirewall firewall = new StrictHttpFirewall();
+        firewall.setAllowUrlEncodedDoubleSlash(true);
+        return firewall;
+    }
+
+    // ========================================================================
+    // API Security Chain: React Front-end এর জন্য (JWT Based)
+    // ========================================================================
     @Bean
     @Order(1)
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
@@ -61,12 +82,6 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/courses", "/api/courses/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/courses/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/courses/**").hasRole("ADMIN")
-                        .requestMatchers("/api/assessments/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/api/enrollments/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/api/feedbacks/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/api/learning/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/api/progress/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/api/questions/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthTokenFilter, UsernamePasswordAuthenticationFilter.class);
@@ -74,13 +89,19 @@ public class WebSecurityConfig {
         return http.build();
     }
 
+    // ========================================================================
+    // Web Security Chain: Thymeleaf Admin প্যানেলের জন্য (Session Based)
+    // ========================================================================
     @Bean
     @Order(2)
     public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
+        String cleanUrl = getCleanFrontendUrl();
+
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        // "/login", "/error" এগুলোকে অবশ্যই পারমিট অল করতে হবে রিডাইরেক্ট লুপ এড়াতে
                         .requestMatchers("/", "/login", "/register", "/error", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/instructor/**").hasAnyRole("INSTRUCTOR", "ADMIN")
@@ -88,24 +109,24 @@ public class WebSecurityConfig {
                 )
                 .exceptionHandling(eh -> eh
                         .authenticationEntryPoint((request, response, authException) -> {
-                            // এরর না দেখিয়ে সরাসরি রিঅ্যাক্ট লগইন পেজে পাঠিয়ে দিবে
-                            response.sendRedirect(frontendUrl + "/login");
+                            // সেশন না থাকলে সরাসরি রিঅ্যাক্ট লগইন পেজে রিডাইরেক্ট
+                            response.sendRedirect(cleanUrl + "/login");
                         })
                 )
                 .formLogin(form -> form
-                        .loginPage(frontendUrl + "/login") // লোকাল ফাইলের বদলে রিঅ্যাক্ট ইউআরএল
+                        .loginPage(cleanUrl + "/login")
                         .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl(frontendUrl + "/login?logout=true") // ডাইনামিক ইউআরএল
+                        .logoutSuccessUrl(cleanUrl + "/login?logout=true")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll()
                 )
                 .sessionManagement(sm -> sm
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .invalidSessionUrl(frontendUrl + "/login?timeout=true") // ডাইনামিক ইউআরএল
+                        .invalidSessionUrl(cleanUrl + "/login?timeout=true")
                 );
 
         return http.build();
@@ -114,14 +135,13 @@ public class WebSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+        String cleanUrl = getCleanFrontendUrl();
 
-        // ১. লোকাল এবং প্রোডাকশন উভয় ইউআরএল-ই লিস্টে রাখা হলো
-        // Render-এর Environment Variable থেকে frontendUrl আসবে
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://127.0.0.1:3000", frontendUrl));
-
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://127.0.0.1:3000", cleanUrl));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

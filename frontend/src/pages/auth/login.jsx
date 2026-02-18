@@ -46,11 +46,13 @@ function Login() {
 
         if (userRole === "ROLE_ADMIN") {
           message.success("Welcome Admin! Redirecting to Management Panel...");
-          window.location.href = `${API_BASE_URL}/admin/dashboard`;
+          const token = localStorage.getItem("token");
+          window.location.href = `${API_BASE_URL}/admin/dashboard?token=${token}`;
 
         } else if (userRole === "ROLE_INSTRUCTOR") {
           message.success("Welcome Instructor! Redirecting to Teacher Portal...");
-          window.location.href = `${API_BASE_URL}/instructor/dashboard`;
+          const token = localStorage.getItem("token");
+          window.location.href = `${API_BASE_URL}/instructor/dashboard?token=${token}`;
 
         } else {
           message.success("Login successful!");

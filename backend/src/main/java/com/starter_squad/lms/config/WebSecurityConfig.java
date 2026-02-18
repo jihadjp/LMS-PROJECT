@@ -2,7 +2,9 @@ package com.starter_squad.lms.config;
 
 import com.starter_squad.lms.security.jwt.JwtAuthTokenFilter;
 import com.starter_squad.lms.security.jwt.JwtAuthenticationEntryPoint;
+import com.starter_squad.lms.security.jwt.TokenAuthFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,8 +20,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
+import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -35,10 +37,12 @@ public class WebSecurityConfig {
     private final JwtAuthenticationEntryPoint unauthorizedHandler;
     private final JwtAuthTokenFilter jwtAuthTokenFilter;
 
+    @Autowired
+    private TokenAuthFilter tokenAuthFilter;
+
     @Value("${app.frontend-url}")
     private String frontendUrl;
 
-    // ১. ডাবল স্ল্যাশ (//) এরর ফিক্স করার জন্য কাস্টম ফায়ারওয়াল
     @Bean
     public HttpFirewall allowUrlEncodedDoubleSlashHttpFirewall() {
         StrictHttpFirewall firewall = new StrictHttpFirewall();
@@ -63,7 +67,7 @@ public class WebSecurityConfig {
         http.securityMatcher("/api/**")
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // ✅
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(eh -> eh.authenticationEntryPoint(unauthorizedHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
@@ -85,6 +89,7 @@ public class WebSecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .addFilterBefore(tokenAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/", "/error",
@@ -93,15 +98,13 @@ public class WebSecurityConfig {
                         ).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/instructor/**").hasAnyRole("INSTRUCTOR", "ADMIN")
-                        .anyRequest().permitAll()  // বাকি সব permit
+                        .anyRequest().permitAll()
                 )
                 .exceptionHandling(eh -> eh
                         .authenticationEntryPoint((request, response, authException) -> {
-                            // Authenticated না হলে React frontend এ পাঠাও
                             response.sendRedirect(cleanUrl + "/login?session_expired=true");
                         })
                 )
-                // ❌ formLogin সরিয়ে দিন — backend এ /login page নেই
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl(cleanUrl + "/login?logout=true")

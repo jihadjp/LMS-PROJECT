@@ -8,39 +8,32 @@ spring:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/lms}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:1234}
-
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-    generate-ddl: true
-    show-sql: true # প্রোডাকশনে এরর ট্র্যাকিং এর জন্য সাময়িকভাবে true রাখতে পারেন
-    open-in-view: false
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
         jdbc:
           lob:
-            non_contextual_creation: true # PostgreSQL এ LOB হ্যান্ডলিং এর জন্য এটি জরুরি
-
+            non_contextual_creation: true
+    open-in-view: false
   thymeleaf:
     cache: false
     prefix: classpath:/templates/
     suffix: .html
 
-# Server Configuration
 server:
+  port: ${PORT:8080}
   servlet:
     session:
       persistent: false
-      store-dir: sessions
-
-  port: ${PORT:8080}
 
 frontend:
-  url: ${FRONTEND_URL:https://lms-netbook-academy.onrender.com}
-app:
-  frontend-url: ${FRONTEND_URL:https://lms-netbook-academy.onrender.com}
+  url: ${FRONTEND_URL:https://lms-frontend-njcv.onrender.com}
 
+app:
+  frontend-url: ${FRONTEND_URL:https://lms-frontend-njcv.onrender.com}
   jwtSecret: ${JWT_SECRET:mySecretKey1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ}
   jwtExpirationMs: ${JWT_EXPIRATION:86400000}
   default-admin:

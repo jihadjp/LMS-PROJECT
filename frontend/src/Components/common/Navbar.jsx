@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faChalkboardUser, faSignOutAlt, faChartLine } from "@fortawesome/free-solid-svg-icons";
 import { authService } from "../../api/auth.service";
 import { useUserContext } from "../../contexts/UserContext";
+import { API_BASE_URL } from "../../api/constant";
 
 function Navbar({ page }) {
   const navigate = useNavigate();
@@ -22,10 +23,11 @@ function Navbar({ page }) {
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   // প্রোফাইল লিঙ্কের গন্তব্য নির্ধারণের ফাংশন
+
   const getProfileTarget = () => {
-    if (user.role === "ROLE_ADMIN") return "http://localhost:8080/admin/dashboard";
-    if (user.role === "ROLE_INSTRUCTOR") return "http://localhost:8080/instructor/dashboard";
-    return "/profile"; // সাধারণ স্টুডেন্টের জন্য রিঅ্যাক্ট রুট
+    if (user.role === "ROLE_ADMIN") return `${API_BASE_URL}/admin/dashboard`;
+    if (user.role === "ROLE_INSTRUCTOR") return `${API_BASE_URL}/instructor/dashboard`;
+    return "/profile";
   };
 
   const handleProfileNavigation = (e) => {

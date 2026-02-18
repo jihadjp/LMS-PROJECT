@@ -53,7 +53,6 @@ function Login() {
           message.success("Welcome Instructor! Redirecting to Teacher Portal...");
           const token = localStorage.getItem("token");
           window.location.href = `${API_BASE_URL}/instructor/dashboard?token=${token}`;
-
         } else {
           message.success("Login successful!");
           navigate("/courses");

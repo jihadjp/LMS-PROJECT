@@ -34,6 +34,8 @@ server:
       persistent: false
       store-dir: sessions
 
+  port: ${PORT:8080}
+
 frontend:
   url: ${FRONTEND_URL:http://localhost:3000}
 app:

@@ -43,16 +43,16 @@ function Login() {
         setUser(result.user);
 
         const userRole = result.user.role;
+        const token = result.token; // ✅ API response থেকে সরাসরি token নেওয়া হচ্ছে
 
         if (userRole === "ROLE_ADMIN") {
           message.success("Welcome Admin! Redirecting to Management Panel...");
-          const token = localStorage.getItem("token");
           window.location.href = `${API_BASE_URL}/admin/dashboard?token=${token}`;
 
         } else if (userRole === "ROLE_INSTRUCTOR") {
           message.success("Welcome Instructor! Redirecting to Teacher Portal...");
-          const token = localStorage.getItem("token");
           window.location.href = `${API_BASE_URL}/instructor/dashboard?token=${token}`;
+
         } else {
           message.success("Login successful!");
           navigate("/courses");

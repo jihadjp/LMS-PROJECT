@@ -23,15 +23,21 @@ public class JwtUtils {
     @Value("${app.jwtExpirationMs}")
     private long jwtExpirationMs;
 
+    // ✅ 1 মিনিট (60,000 ms) buffer time — overflow ঠেকাতে long ব্যবহার
+    private static final long BUFFER_MS = 60_000L;
+
     public String generateJwtToken(Authentication authentication) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+
+        long now = System.currentTimeMillis();
+        long expiration = now + jwtExpirationMs + BUFFER_MS; // ✅ long arithmetic, overflow নেই
 
         return Jwts.builder()
                 .setSubject(userPrincipal.getEmail())
                 .claim("userId", userPrincipal.getId())
                 .claim("role", userPrincipal.getAuthorities().iterator().next().getAuthority())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                .setIssuedAt(new Date(now))
+                .setExpiration(new Date(expiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512)
                 .compact();
     }

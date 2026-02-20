@@ -1,10 +1,5 @@
 import { API_BASE_URL } from "./constant";
 
-/**
- * ১. লগইন ফাংশন
- * এখানে JWT টোকেন সংগ্রহের পাশাপাশি Session Cookie (JSESSIONID) তৈরির জন্য 
- * credentials: "include" ব্যবহার করা হয়েছে।
- */
 async function login(email, password) {
   try {
     const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
@@ -12,14 +7,13 @@ async function login(email, password) {
       headers: {
         "Content-Type": "application/json",
       },
-      credentials: "include", 
+      credentials: "include",
       body: JSON.stringify({ email, password }),
     });
 
     const result = await response.json();
 
     if (response.ok) {
-      // আপনার ব্যাকএন্ড সাধারণত ডাটা result.data এর ভেতরে পাঠায়
       const jwtData = result.data;
 
       localStorage.setItem("token", jwtData.token);
@@ -30,6 +24,7 @@ async function login(email, password) {
 
       return {
         success: true,
+        token: jwtData.token, // ✅ সরাসরি token return করা হচ্ছে
         user: {
           id: jwtData.id,
           name: jwtData.name,
@@ -49,34 +44,29 @@ async function login(email, password) {
   }
 }
 
-/**
- * ২. ইউজার ডিটেইলস সংগ্রহের ফাংশন (সেশন ভেরিফিকেশনের জন্য)
- * লগে 'Anonymous' দেখানোর কারণ হলো টোকেনটি ঠিকমতো যাচ্ছিল না। 
- */
 async function getUserDetails(email) {
   try {
     const token = localStorage.getItem("token");
     if (!token) return { success: false, error: "No token found" };
 
     const response = await fetch(
-      `${API_BASE_URL}/api/users/details?email=${email}`,
-      {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${token}`, // এটি অত্যন্ত জরুরি
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // সেশন ব্রিজ বজায় রাখার জন্য
-      }
+        `${API_BASE_URL}/api/users/details?email=${email}`,
+        {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
     );
 
     const result = await response.json();
 
     if (response.ok) {
-      // ব্যাকএন্ড যদি ApiResponse<User> রিটার্ন করে, তবে ডাটা result.data তে থাকে
       return {
         success: true,
-        data: result.data || result, // ডাটা নেস্টেড থাকলে সেটি হ্যান্ডেল করবে
+        data: result.data || result,
       };
     } else {
       return { success: false, error: result.message || "Session invalid" };
@@ -87,10 +77,6 @@ async function getUserDetails(email) {
   }
 }
 
-/**
- * ৩. লগআউট ফাংশন
- * এটি সার্ভার সেশন এবং লোকাল স্টোরেজ উভয়ই ক্লিয়ার করবে।
- */
 async function logout() {
   try {
     const token = localStorage.getItem("token");
@@ -101,17 +87,13 @@ async function logout() {
       },
       credentials: "include",
     });
-    console.log("Backend session cleared");
   } catch (error) {
     console.error("Logout error:", error);
   } finally {
     localStorage.clear();
-    // রিঅ্যাক্ট অ্যাপ রিলোড করে লগইন পেজে পাঠাবে
     window.location.href = "/login?logout=true";
   }
 }
-
-// --- হেল্পার ফাংশনসমূহ ---
 
 async function register(formData) {
   try {

@@ -2,9 +2,7 @@ package com.starter_squad.lms.config;
 
 import com.starter_squad.lms.security.jwt.JwtAuthTokenFilter;
 import com.starter_squad.lms.security.jwt.JwtAuthenticationEntryPoint;
-import com.starter_squad.lms.security.jwt.TokenAuthFilter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,9 +35,6 @@ public class WebSecurityConfig {
 
     private final JwtAuthenticationEntryPoint unauthorizedHandler;
     private final JwtAuthTokenFilter jwtAuthTokenFilter;
-
-    @Autowired
-    private TokenAuthFilter tokenAuthFilter;
 
     @Value("${app.frontend-url}")
     private String frontendUrl;
@@ -81,27 +76,25 @@ public class WebSecurityConfig {
         return http.build();
     }
 
-    // Web Chain for Admin/Instructor Panel (Thymeleaf) — SESSION BASED
+    // Web Chain for Admin/Instructor Panel — SESSION BASED
     @Bean
     @Order(2)
     public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
-        String cleanUrl = (frontendUrl.endsWith("/")) ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
+        String cleanUrl = (frontendUrl.endsWith("/"))
+                ? frontendUrl.substring(0, frontendUrl.length() - 1)
+                : frontendUrl;
 
-        // ✅ HttpSessionSecurityContextRepository ব্যবহার করো
-        // Spring Security 6 এ এটা explicit করতে হয়
         HttpSessionSecurityContextRepository sessionRepo = new HttpSessionSecurityContextRepository();
 
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                // ✅ Session repo explicitly set করো
                 .securityContext(sc -> sc.securityContextRepository(sessionRepo))
-                // ✅ Session always create করো admin/instructor এর জন্য
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-                .addFilterBefore(tokenAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/", "/error",
+                                "/auth/redirect",   // ✅ এই endpoint সবার জন্য open
                                 "/static/**", "/css/**", "/js/**", "/images/**",
                                 "/actuator/**"
                         ).permitAll()
@@ -126,7 +119,9 @@ public class WebSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        String cleanUrl = (frontendUrl.endsWith("/")) ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
+        String cleanUrl = (frontendUrl.endsWith("/"))
+                ? frontendUrl.substring(0, frontendUrl.length() - 1)
+                : frontendUrl;
 
         configuration.setAllowedOrigins(List.of("http://localhost:3000", cleanUrl));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));

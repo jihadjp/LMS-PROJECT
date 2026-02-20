@@ -94,8 +94,14 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/", "/error",
-                                "/auth/redirect",   // ✅ এই endpoint সবার জন্য open
-                                "/static/**", "/css/**", "/js/**", "/images/**",
+                                "/auth/redirect",
+                                "/static/**",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/dist/**",
+                                "/plugins/**",
+                                "/pages/**",
                                 "/actuator/**"
                         ).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")

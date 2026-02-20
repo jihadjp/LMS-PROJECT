@@ -1,8 +1,8 @@
 package com.starter_squad.lms.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.starter_squad.lms.dto.EnrollRequest;
 import com.starter_squad.lms.entity.Course;
 import com.starter_squad.lms.entity.Learning;
@@ -19,44 +19,38 @@ import java.util.*;
 public class LearningService {
 
     private final LearningRepository learningRepository;
-
     private final UserRepository userRepository;
-
     private final CourseRepository courseRepository;
-    
     private final ProgressRepository progressRepository;
 
+    // ✅ @Transactional — Session open রাখবে, LazyInitializationException হবে না
+    @Transactional(readOnly = true)
     public List<Course> getLearningCourses(UUID userId) {
         Optional<User> optionalUser = userRepository.findById(userId);
-        
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             List<Course> learningCourses = new ArrayList<>();
-
             for (Learning learning : user.getLearningCourses()) {
-                Course course = learning.getCourse();
-                learningCourses.add(course);
+                learningCourses.add(learning.getCourse());
             }
-
             return learningCourses;
         }
-
         return null;
     }
-    
+
+    @Transactional(readOnly = true)
     public List<Learning> getEnrollments() {
-    	return learningRepository.findAll();
+        return learningRepository.findAll();
     }
 
+    @Transactional
     public String enrollCourse(EnrollRequest enrollRequest) {
         User user = userRepository.findById(enrollRequest.getUserId()).orElse(null);
         Course course = courseRepository.findById(enrollRequest.getCourseId()).orElse(null);
 
         if (user != null && course != null) {
             Learning existingLearning = learningRepository.findByUserAndCourse(user, course);
-            if (existingLearning != null) {
-                return "Course already enrolled";
-            }
+            if (existingLearning != null) return "Course already enrolled";
 
             Progress progress = new Progress();
             progress.setUser(user);
@@ -70,32 +64,31 @@ public class LearningService {
 
             return "Enrolled successfully";
         }
-
         return "Failed to enroll";
     }
 
-
+    @Transactional
     public void unenrollCourse(UUID id) {
         learningRepository.deleteById(id);
     }
-    
-    // Get all enrollments for instructor's courses
+
+    @Transactional(readOnly = true)
     public List<Learning> getEnrollmentsByInstructorId(UUID instructorId) {
         return learningRepository.findByInstructorId(instructorId);
     }
-    
-    // Get total unique students enrolled in instructor's courses
+
+    @Transactional(readOnly = true)
     public long getStudentCountByInstructorId(UUID instructorId) {
         return learningRepository.countStudentsByInstructorId(instructorId);
     }
-    
-    // Get recent enrollments for instructor's courses (limited)
+
+    @Transactional(readOnly = true)
     public List<Learning> getRecentEnrollmentsByInstructorId(UUID instructorId, int limit) {
         List<Learning> enrollments = learningRepository.findRecentByInstructorId(instructorId);
         return enrollments.stream().limit(limit).toList();
     }
-    
-    // Get enrollments by course ID
+
+    @Transactional(readOnly = true)
     public List<Learning> getEnrollmentsByCourseId(UUID courseId) {
         return learningRepository.findByCourseId(courseId);
     }

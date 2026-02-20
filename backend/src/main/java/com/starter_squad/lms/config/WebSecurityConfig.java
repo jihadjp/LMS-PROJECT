@@ -20,8 +20,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.firewall.StrictHttpFirewall;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -60,7 +61,7 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // API Chain for React
+    // API Chain for React — STATELESS
     @Bean
     @Order(1)
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
@@ -80,15 +81,23 @@ public class WebSecurityConfig {
         return http.build();
     }
 
-    // Web Chain for Admin Panel (Thymeleaf)
+    // Web Chain for Admin/Instructor Panel (Thymeleaf) — SESSION BASED
     @Bean
     @Order(2)
     public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
         String cleanUrl = (frontendUrl.endsWith("/")) ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
 
+        // ✅ HttpSessionSecurityContextRepository ব্যবহার করো
+        // Spring Security 6 এ এটা explicit করতে হয়
+        HttpSessionSecurityContextRepository sessionRepo = new HttpSessionSecurityContextRepository();
+
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // ✅ Session repo explicitly set করো
+                .securityContext(sc -> sc.securityContextRepository(sessionRepo))
+                // ✅ Session always create করো admin/instructor এর জন্য
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .addFilterBefore(tokenAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(

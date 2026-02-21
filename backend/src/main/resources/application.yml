@@ -17,7 +17,7 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
-    open-in-view: false
+    open-in-view: true
   thymeleaf:
     cache: false
     prefix: classpath:/templates/
@@ -31,9 +31,11 @@ server:
 
 frontend:
   url: ${FRONTEND_URL:https://lms-frontend-njcv.onrender.com}
+#  url: ${FRONTEND_URL:http://localhost:3000}}
 
 app:
   frontend-url: ${FRONTEND_URL:https://lms-frontend-njcv.onrender.com}
+#  frontend-url: ${FRONTEND_URL:http://localhost:3000}
   jwtSecret: ${JWT_SECRET:mySecretKey1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ}
   jwtExpirationMs: ${JWT_EXPIRATION:86400000}
   default-admin:

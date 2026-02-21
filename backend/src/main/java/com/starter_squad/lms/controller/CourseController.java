@@ -18,7 +18,7 @@ public class CourseController {
 
     @GetMapping
     public List<Course> getAllCourses() {
-        return courseService.getAllCourses();
+        return courseService.getPublishedCourses();
     }
 
     @GetMapping("/{id}")
